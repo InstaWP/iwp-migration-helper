@@ -1,0 +1,105 @@
+{
+    "packages": [
+        {
+            "name": "instawp/connect-helpers",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:InstaWP/connect-helpers.git",
+                "reference": "3f70b00aabe7172cbae70970580b55514d12557c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/InstaWP/connect-helpers/zipball/3f70b00aabe7172cbae70970580b55514d12557c",
+                "reference": "3f70b00aabe7172cbae70970580b55514d12557c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">= 7.4.0",
+                "wp-cli/wp-config-transformer": "^1.3"
+            },
+            "time": "2023-12-22T05:06:34+00:00",
+            "default-branch": true,
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "InstaWP\\Connect\\Helpers\\": "src/"
+                }
+            },
+            "scripts": {
+                "build": [
+                    "composer dump-autoload"
+                ],
+                "build-nd": [
+                    "composer dump-autoload --no-dev"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sayan Datta",
+                    "email": "sayan@instawp.com"
+                }
+            ],
+            "description": "CLI Package for InstaWP Remote Features",
+            "support": {
+                "source": "https://github.com/InstaWP/connect-helpers/tree/main",
+                "issues": "https://github.com/InstaWP/connect-helpers/issues"
+            },
+            "install-path": "../instawp/connect-helpers"
+        },
+        {
+            "name": "wp-cli/wp-config-transformer",
+            "version": "v1.3.5",
+            "version_normalized": "1.3.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wp-cli/wp-config-transformer.git",
+                "reference": "202aa80528939159d52bc4026cee5453aec382db"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wp-cli/wp-config-transformer/zipball/202aa80528939159d52bc4026cee5453aec382db",
+                "reference": "202aa80528939159d52bc4026cee5453aec382db",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "wp-cli/wp-cli-tests": "^4.0"
+            },
+            "time": "2023-11-10T14:28:03+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "files": [
+                    "src/WPConfigTransformer.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frankie Jarrett",
+                    "email": "fjarrett@gmail.com"
+                }
+            ],
+            "description": "Programmatically edit a wp-config.php file.",
+            "homepage": "https://github.com/wp-cli/wp-config-transformer",
+            "support": {
+                "issues": "https://github.com/wp-cli/wp-config-transformer/issues",
+                "source": "https://github.com/wp-cli/wp-config-transformer/tree/v1.3.5"
+            },
+            "install-path": "../wp-cli/wp-config-transformer"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}

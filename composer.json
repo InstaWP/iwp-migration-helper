@@ -1,0 +1,33 @@
+{
+    "name": "instawp/hosting-migration",
+    "description": "Migration helper plugin for hosting providers",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Vikas",
+            "email": "vikas@instawp.com"
+        }
+    ],
+    "require": {
+        "php": ">= 7.4.0",
+        "instawp/connect-helpers": "dev-main"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:InstaWP/connect-helpers.git"
+        }
+    ],
+    "scripts": {
+        "build": [
+            "composer dump-autoload"
+        ],
+        "build-nd": [
+            "composer dump-autoload --no-dev"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
