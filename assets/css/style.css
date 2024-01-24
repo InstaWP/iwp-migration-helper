@@ -2,30 +2,34 @@
 /* CSS Document */
 
 :root {
-    --seoroshi-color-primary: #374151;
-    --seoroshi-color-secondary: #0f766e;
-    --seoroshi-color-secondary-600: #059669;
-    --seoroshi-color-primary-dim: #e2e8f0;
-    --seoroshi-color-red: #f44336;
-    --seoroshi-color-green: #0f766e;
+    --iwp-hosting-color-primary: #03337e;
+    --iwp-hosting-color-primary-50: #f9fbff;
+    --iwp-hosting-color-primary-100: #e3eeff;
+    --iwp-hosting-color-primary-400: #78adff;
+    --iwp-hosting-color-primary-600: #0d4bab;
+    --iwp-hosting-color-secondary: #03337e;
+    --iwp-hosting-color-yellow-100: #fff6a7;
 }
 
-
 .notice.notice-warning.iwp-hosting-mig-wrap {
-    background: #ecfdf5;
-    border: 1px solid #10b981;
+    background: var(--iwp-hosting-color-primary-100);
+    border: 1px solid var(--iwp-hosting-color-primary-400);
     border-radius: 5px;
     box-shadow: none !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 16px 10px 16px;
+    padding: 8px 16px 8px 16px;
     overflow: hidden;
 }
 
+.notice.notice-warning.iwp-hosting-mig-wrap > p {
+    font-size: 16px;
+}
+
 .notice.notice-warning.iwp-hosting-mig-wrap span.mig-button {
-    background: #047857;
-    color: #ecf8f3;
+    background: var(--iwp-hosting-color-primary-600);
+    color: var(--iwp-hosting-color-primary-50);
     padding: 8px 12px;
     border-radius: 5px;
     cursor: pointer;
@@ -53,9 +57,16 @@
 }
 
 .notice.notice-warning.iwp-hosting-mig-wrap span.mig-button:hover {
-    background: #004840;
+    background: var(--iwp-hosting-color-primary);
 }
 
+.notice.notice-warning.iwp-hosting-mig-wrap span.mig-guide-text {
+    background: var(--iwp-hosting-color-yellow-100);
+    font-size: 12px;
+    padding: 5px 8px;
+    margin-right: 10px;
+    border-radius: 3px;
+}
 
 @keyframes loading {
     0% {
