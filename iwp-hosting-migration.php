@@ -222,22 +222,3 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
 IWP_HOSTING_MIG_Main::instance();
-
-add_action( 'wp_head', function () {
-	if ( isset( $_GET['debug'] ) ) {
-
-//		delete_option( 'instawp_api_options' );
-
-		echo "<pre>";
-		print_r( get_option( 'instawp_api_options' ) );
-		echo "</pre>";
-
-//		global $iwp_hosting_mig;
-//
-//		echo "<pre>";
-//		print_r( $iwp_hosting_mig );
-//		echo "</pre>";
-
-		die();
-	}
-}, 0 );
