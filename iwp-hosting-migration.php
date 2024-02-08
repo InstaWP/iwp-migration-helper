@@ -17,7 +17,8 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.1' );
 
-define( 'INSTAWP_API_KEY', 'ZSfvY7Xv9QMFhTkpMnJ0nJcQPzLNVetYQ66ZatN9' );
+define( 'INSTAWP_API_KEY', 'auLF3EBeFaoGrfQKVqsG3Qe7Giyi1wPCtDL3DtS3' );
+define( 'INSTAWP_URL', 'https://app.instawp.io' );
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 	class IWP_HOSTING_MIG_Main {
@@ -70,15 +71,21 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				$installer = new \InstaWP\Connect\Helpers\Installer( $params );
 				$response  = $installer->start();
 
-				$this->set_api_data( 'api_url', 'https://stage.instawp.io' );
-				$this->set_api_data( 'api_key', $this->get_api_data() );
-
 				wp_send_json_success(
 					array(
 						'message'  => esc_html__( 'Plugin activated successfully.' ),
 						'response' => $response
 					)
 				);
+			}
+
+
+			if ( get_option( 'instawp_bh_set_api_options' ) != 'yes' ) {
+
+				$this->set_api_data( 'api_url', $this->get_api_data( 'api_url' ) );
+				$this->set_api_data( 'api_key', $this->get_api_data() );
+
+				update_option( 'instawp_bh_set_api_options', 'yes' );
 			}
 
 			// Connect the website with InstaWP server
@@ -124,9 +131,9 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 		function display_migration_notice() {
 
-			$btn_label     = esc_html__( 'Connect' );
-			$redirect_url  = '';
-			$classes       = array(
+			$btn_label    = esc_html__( 'Connect' );
+			$redirect_url = '';
+			$classes      = array(
 				'notice',
 				'notice-warning',
 				'iwp-hosting-mig-wrap'
@@ -187,7 +194,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			$api_options = get_option( 'instawp_api_options', array() );
 			$value       = '';
 
-			if ( ( ! is_array( $api_options ) || empty( $api_options ) ) && $key != 'api_key' ) {
+			if ( ( ! is_array( $api_options ) || empty( $api_options ) ) && $key != 'api_key' && $key != 'api_url' ) {
 				return $value;
 			}
 
@@ -195,15 +202,25 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				$value = $api_options[ $key ];
 			}
 
-			// Check ENV
+			// Check api_key && ENV
 			if ( $key == 'api_key' && empty( $value ) ) {
-				$env_data = parse_ini_file( ABSPATH . '.env' );
-				$value    = isset( $env_data['INSTAWP_API_KEY'] ) ? sanitize_text_field( $env_data['INSTAWP_API_KEY'] ) : $value;
+				$env_file = ABSPATH . '.env';
+
+				if ( file_exists( $env_file ) && is_readable( $env_file ) ) {
+					$env_data = parse_ini_file( ABSPATH . '.env' );
+					$value    = isset( $env_data['INSTAWP_API_KEY'] ) ? sanitize_text_field( $env_data['INSTAWP_API_KEY'] ) : $value;
+				}
 			}
 
-			// Check constant
+			// Check api_key && constant
 			if ( $key == 'api_key' && empty( $value ) ) {
 				$value = defined( 'INSTAWP_API_KEY' ) ? INSTAWP_API_KEY : $value;
+			}
+
+			// Check api_url && constant
+			if ( $key == 'api_url' ) {
+				$value = defined( 'INSTAWP_URL' ) ? INSTAWP_URL : $value;
+				$value = empty( $value ) ? 'https://app.instawp.io' : $value;
 			}
 
 			return $value;
