@@ -2,3 +2,5 @@ This plugin is aimed to be a companion plugin which acts as a bridge b/w Destina
 
 You can take the entire code and adopt it in your plugin, if you wish you. 
 
+## Walkthrough
+https://www.youtube.com/watch?v=8yY1UBSas0M
