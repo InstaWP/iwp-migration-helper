@@ -1,21 +1,19 @@
 <?php
-declare( strict_types=1 );
-
 namespace InstaWP\Connect\Helpers;
 
 class Option {
 
-	public function update( $args = [] ): array {
+	public function update( $args = [] ) {
 		$results = [];
 
 		try {
 			foreach( $args as $name => $value ) {
 				$results[] = [
 					'name'    => $name,
-					'success' => update_option( $name, $value ),
+					'success' => update_option( $name, $value, false ),
 				];
 			}
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			$results = [
 				'success' => false,
 				'message' => $e->getMessage(),
@@ -25,7 +23,7 @@ class Option {
         return $results;
     }
 
-	public function delete( $args = [] ): array {
+	public function delete( $args = [] ) {
         $results = [ 'success' => true ];
         
 		try {
@@ -35,7 +33,7 @@ class Option {
 					'success' => delete_option( $name ),
 				];
 			}
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			$results = [
 				'success' => false,
 				'message' => $e->getMessage(),

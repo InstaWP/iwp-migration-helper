@@ -34,6 +34,7 @@ class ComposerStaticInit9abf8aaa483f80c232ee7a59c615d590
         'InstaWP\\Connect\\Helpers\\Installer' => __DIR__ . '/..' . '/instawp/connect-helpers/src/Installer.php',
         'InstaWP\\Connect\\Helpers\\Inventory' => __DIR__ . '/..' . '/instawp/connect-helpers/src/Inventory.php',
         'InstaWP\\Connect\\Helpers\\Option' => __DIR__ . '/..' . '/instawp/connect-helpers/src/Option.php',
+        'InstaWP\\Connect\\Helpers\\Updater' => __DIR__ . '/..' . '/instawp/connect-helpers/src/Updater.php',
         'InstaWP\\Connect\\Helpers\\WPConfig' => __DIR__ . '/..' . '/instawp/connect-helpers/src/WPConfig.php',
     );
 

@@ -7,19 +7,19 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:InstaWP/connect-helpers.git",
-                "reference": "3f70b00aabe7172cbae70970580b55514d12557c"
+                "reference": "fc004a2b7bca8f37d4f56c8ed66eb3b8c6184d5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/InstaWP/connect-helpers/zipball/3f70b00aabe7172cbae70970580b55514d12557c",
-                "reference": "3f70b00aabe7172cbae70970580b55514d12557c",
+                "url": "https://api.github.com/repos/InstaWP/connect-helpers/zipball/fc004a2b7bca8f37d4f56c8ed66eb3b8c6184d5d",
+                "reference": "fc004a2b7bca8f37d4f56c8ed66eb3b8c6184d5d",
                 "shasum": ""
             },
             "require": {
-                "php": ">= 7.4.0",
+                "php": ">= 5.6",
                 "wp-cli/wp-config-transformer": "^1.3"
             },
-            "time": "2023-12-22T05:06:34+00:00",
+            "time": "2024-03-15T12:46:51+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",

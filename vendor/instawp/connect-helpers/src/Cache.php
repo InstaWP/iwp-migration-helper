@@ -1,11 +1,9 @@
 <?php
-declare( strict_types=1 );
-
 namespace InstaWP\Connect\Helpers;
 
 class Cache {
 
-    public function clean(): array {
+    public function clean() {
         $results = [];
 
         if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -13,6 +11,23 @@ class Cache {
 		}
 
 		$results = [];
+
+		// Elementor.
+		if ( is_plugin_active( 'elementor/elementor.php' ) ) {
+			$message = '';
+
+			if ( class_exists( '\Elementor\Plugin' ) ) {
+				\Elementor\Plugin::$instance->files_manager->clear_cache();
+			} else {
+				$message = 'Class or Method not exists.';
+			}
+			
+			$results[] = [
+				'slug'    => 'elementor',
+				'name'    => 'Elementor',
+				'message' => $message
+			];
+		}
 
 		// WordPress Cache / Object Cache Plugins (e.g. Radis Cache, Docket Cache).
 		if ( function_exists( 'wp_cache_flush' ) ) {
@@ -242,37 +257,6 @@ class Cache {
 			];
 		}
 
-		// bunny.net.
-		if ( is_plugin_active( 'bunnycdn/bunnycdn.php' ) ) {
-			$message = '';
-
-			if ( class_exists( '\BunnyCdn' ) && method_exists( '\BunnyCdn', 'getOptions' ) ) {
-				$options = \BunnyCdn::getOptions();
-				$domain  = 'instawpcom.b-cdn.net';
-
-				if ( ! empty( $domain ) ) {
-					$response = wp_remote_post( 'https://bunnycdn.com/api/pullzone/purgeCacheByHostname?hostname=' . $domain, [
-						'headers' => [
-							'AccessKey' => htmlspecialchars( $options['api_key'] ),
-						],
-					] );
-					if ( is_wp_error( $response ) ) {
-						$message = $response->get_error_message();
-					}
-				} else {
-					$message = 'CDN Domain is empty.';
-				}
-			} else {
-				$message = 'Class or Method not exists.';
-			}
-
-			$results[] = [
-				'slug'    => 'bunnycdn',
-				'name'    => 'bunny.net',
-				'message' => $message
-			];
-		}
-
 		// Cachify.
 		if ( is_plugin_active( 'cachify/cachify.php' ) ) {
 			$message = '';
@@ -324,19 +308,33 @@ class Cache {
 			];
 		}
 
-		// SiteGround Optimizer.
-		if ( is_plugin_active( 'sg-cachepress/sg-cachepress.php' ) ) {
+		// bunny.net.
+		if ( is_plugin_active( 'bunnycdn/bunnycdn.php' ) ) {
 			$message = '';
 
-			if ( function_exists( 'sg_cachepress_purge_cache' ) ) {
-				sg_cachepress_purge_cache();
+			if ( class_exists( '\BunnyCdn' ) && method_exists( '\BunnyCdn', 'getOptions' ) ) {
+				$options = \BunnyCdn::getOptions();
+				$domain  = 'instawpcom.b-cdn.net';
+
+				if ( ! empty( $domain ) ) {
+					$response = wp_remote_post( 'https://bunnycdn.com/api/pullzone/purgeCacheByHostname?hostname=' . $domain, [
+						'headers' => [
+							'AccessKey' => htmlspecialchars( $options['api_key'] ),
+						],
+					] );
+					if ( is_wp_error( $response ) ) {
+						$message = $response->get_error_message();
+					}
+				} else {
+					$message = 'CDN Domain is empty.';
+				}
 			} else {
-				$message = 'Function not exists.';
+				$message = 'Class or Method not exists.';
 			}
 
 			$results[] = [
-				'slug'    => 'sg-cachepress',
-				'name'    => 'SiteGround Optimizer',
+				'slug'    => 'bunnycdn',
+				'name'    => 'bunny.net',
 				'message' => $message
 			];
 		}
@@ -375,20 +373,36 @@ class Cache {
 			];
 		}
 
-		// Cloudflare.
-		if ( is_plugin_active( 'cloudflare/cloudflare.php' ) ) {
+		// SiteGround Optimizer.
+		if ( is_plugin_active( 'sg-cachepress/sg-cachepress.php' ) ) {
 			$message = '';
 
-			if ( class_exists( '\CF\WordPress\Hooks' ) && method_exists( '\CF\WordPress\Hooks', 'purgeCacheEverything' ) ) {
-				$cf = new \CF\WordPress\Hooks();
-				$cf->purgeCacheEverything();
+			if ( function_exists( 'sg_cachepress_purge_cache' ) ) {
+				sg_cachepress_purge_cache();
+			} else {
+				$message = 'Function not exists.';
+			}
+
+			$results[] = [
+				'slug'    => 'sg-cachepress',
+				'name'    => 'SiteGround Optimizer',
+				'message' => $message
+			];
+		}
+
+		// RunCloud Hub.
+		if ( is_plugin_active( 'runcloud-hub/runcloud-hub.php' ) ) {
+			$message = '';
+
+			if ( class_exists( '\RunCloud_Hub' ) && method_exists( '\RunCloud_Hub', 'purge_cache_all' ) ) {
+				\RunCloud_Hub::purge_cache_all();
 			} else {
 				$message = 'Class or Method not exists.';
 			}
 
 			$results[] = [
-				'slug'    => 'cloudflare',
-				'name'    => 'Cloudflare',
+				'slug'    => 'runcloud-hub',
+				'name'    => 'RunCloud Hub',
 				'message' => $message
 			];
 		}
@@ -455,16 +469,32 @@ class Cache {
 			];
 		}
 
-		$results = array_map( function( $result ) {
+		// Cloudflare.
+		if ( is_plugin_active( 'cloudflare/cloudflare.php' ) ) {
+			$message = '';
+
+			if ( class_exists( '\CF\WordPress\Hooks' ) && method_exists( '\CF\WordPress\Hooks', 'purgeCacheEverything' ) ) {
+				$cf = new \CF\WordPress\Hooks();
+				$cf->purgeCacheEverything();
+			} else {
+				$message = 'Class or Method not exists.';
+			}
+
+			$results[] = [
+				'slug'    => 'cloudflare',
+				'name'    => 'Cloudflare',
+				'message' => $message
+			];
+		}
+
+		return array_map( function( $result ) {
 			$message = trim( $result['message'] );
 			unset( $result['message'] );
 
-			$result['status']  = empty( $message );
+			$result['success'] = empty( $message );
 			$result['message'] = $message;
 			
 			return $result;
 		}, $results );
-
-        return $results;
     }
 }
