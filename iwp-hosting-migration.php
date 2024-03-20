@@ -17,8 +17,9 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.1' );
 
-define( 'INSTAWP_API_KEY', 'auLF3EBeFaoGrfQKVqsG3Qe7Giyi1wPCtDL3DtS3' );
-define( 'INSTAWP_URL', 'https://app.instawp.io' );
+defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'apikey' );
+defined( 'INSTAWP_ENVIRONMENT' ) || define( 'INSTAWP_ENVIRONMENT', 'app' );
+defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 	class IWP_HOSTING_MIG_Main {
@@ -30,6 +31,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		private $api_url;
 		private $connect_id;
 		private $connect_plugin_slug;
+		private $redirect_url;
 
 		function __construct() {
 
@@ -39,6 +41,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			$this->api_url             = rtrim( $this->get_api_data( 'api_url' ), '/' );
 			$this->connect_id          = $this->get_api_data( 'connect_id' );
 			$this->connect_plugin_slug = 'instawp-connect';
+			$this->redirect_url        = esc_url( $this->api_url . '/' . INSTAWP_MIGRATE_ENDPOINT . '?d_id=' . $this->connect_id );
 
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
@@ -116,7 +119,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					array(
 						'message'      => esc_html__( 'Ready to start migration.' ),
 						'response'     => true,
-						'redirect_url' => esc_url( $this->api_url . '/migrate?d_id=' . $this->connect_id ),
+						'redirect_url' => $this->redirect_url,
 					)
 				);
 			}
@@ -143,7 +146,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				$guide_message = esc_html__( 'Website is connected.' );
 				$btn_label     = esc_html__( 'Start Migration' );
 				$classes[]     = 'connected';
-				$redirect_url  = esc_url( $this->api_url . '/migrate?d_id=' . $this->connect_id );
+				$redirect_url  = $this->redirect_url;
 			} elseif ( ! function_exists( 'instawp' ) ) {
 				$guide_message = esc_html__( 'InstaWP Connect plugin not found.' );
 			} else {
@@ -219,7 +222,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			// Check api_url && constant
 			if ( $key == 'api_url' ) {
-				$value = defined( 'INSTAWP_URL' ) ? INSTAWP_URL : $value;
+				$value = defined( 'INSTAWP_ENVIRONMENT' ) ? 'https://' . INSTAWP_ENVIRONMENT . '.instawp.io' : $value;
 				$value = empty( $value ) ? 'https://app.instawp.io' : $value;
 			}
 
