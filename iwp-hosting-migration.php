@@ -224,6 +224,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			if ( $key == 'api_url' ) {
 				$value = defined( 'INSTAWP_ENVIRONMENT' ) ? 'https://' . INSTAWP_ENVIRONMENT . '.instawp.io' : $value;
 				$value = empty( $value ) ? 'https://app.instawp.io' : $value;
+
+				$this->set_api_data( 'api_url', $value );
 			}
 
 			return $value;
