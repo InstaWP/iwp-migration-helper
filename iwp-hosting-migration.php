@@ -20,8 +20,8 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.2' );
 
-defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', '2S7tJcHRiQ2gcEehF3u914pXoVIpioc2KgM6Hm78' );
-defined( 'INSTAWP_API_URL' ) || define( 'INSTAWP_API_URL', 'https://stage.instawp.io' );
+defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'X2MgiS1X5or1imiaentrlPlOjlokJncaAlHpOt6J' );
+defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://stage.instawp.io' );
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate/bluehost' );
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -42,7 +42,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
 
 			$this->api_key      = Helper::get_api_key( false, INSTAWP_API_KEY );
-			$this->api_url      = Helper::get_api_domain( INSTAWP_API_URL );
+			$this->api_url      = Helper::get_api_domain( INSTAWP_API_DOMAIN );
 			$this->connect_id   = Helper::get_connect_id();
 			$this->connect_uuid = Helper::get_connect_uuid();
 			$this->redirect_url = esc_url( $this->api_url . '/' . INSTAWP_MIGRATE_ENDPOINT . '?d_id=' . $this->connect_uuid );
@@ -247,24 +247,9 @@ add_action( 'wp_head', function () {
 
 //		delete_option( 'instawp_api_options' );
 
-//		echo "<pre>";
-//		print_r( \InstaWP\Connect\Helpers\Option::get_option( 'instawp_api_options' ) );
-//		echo "</pre>";
-
-
-
-
-
-
-
-
-
-
-		
-
-
-
-
+		echo "<pre>";
+		print_r( \InstaWP\Connect\Helpers\Option::get_option( 'instawp_api_options' ) );
+		echo "</pre>";
 
 
 		die();

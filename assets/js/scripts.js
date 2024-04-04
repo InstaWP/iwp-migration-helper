@@ -64,7 +64,7 @@
             interval_id;
 
         if (el_hosting_mig_wrap.hasClass('connected')) {
-            window.open(el_connect_btn.data('redirect'), '_blank');
+            window.open(el_connect_btn.data('redirect'), '_self');
             return;
         }
 
