@@ -19,7 +19,7 @@ function updateFile(cb) {
             placeholder: ''
         },
         {
-            key: 'INSTAWP_ENVIRONMENT',
+            key: 'INSTAWP_API_DOMAIN',
             prompt: 'Enter the InstaWP Environment (Default: app) : ',
             placeholder: 'app'
         },
@@ -41,8 +41,15 @@ function updateFile(cb) {
                 originalValues[valueInfo.key] = valueInfo.placeholder;
             }
 
+            let constant_key = valueInfo.key,
+                constant_val = content;
+
+            if (constant_key === 'INSTAWP_API_DOMAIN') {
+                constant_val = 'https://' + content + '.instawp.io';
+            }
+
             gulp.src('iwp-hosting-migration.php')
-                .pipe(replace(new RegExp(`define\\(\\s*'${valueInfo.key}'\\s*,\\s*'[^']*'\\s*\\)`, 'g'), `define( '${valueInfo.key}', '${content}' )`))
+                .pipe(replace(new RegExp(`define\\(\\s*'${constant_key}'\\s*,\\s*'[^']*'\\s*\\)`, 'g'), `define( '${constant_key}', '${constant_val}' )`))
                 .pipe(gulp.dest('./'))
                 .on('end', function () {
                     currentIndex++;

@@ -41,8 +41,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
 
+			Helper::set_api_domain( INSTAWP_API_DOMAIN );
+
 			$this->api_key      = Helper::get_api_key( false, INSTAWP_API_KEY );
-			$this->api_url      = Helper::get_api_domain( INSTAWP_API_DOMAIN );
+			$this->api_url      = Helper::get_api_domain();
 			$this->connect_id   = Helper::get_connect_id();
 			$this->connect_uuid = Helper::get_connect_uuid();
 			$this->redirect_url = esc_url( $this->api_url . '/' . INSTAWP_MIGRATE_ENDPOINT . '?d_id=' . $this->connect_uuid );
@@ -65,7 +67,6 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			if ( ! function_exists( 'get_plugins' ) || ! function_exists( 'get_mu_plugins' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
-
 
 			// Install and activate the plugin
 			if ( ! is_plugin_active( sprintf( '%1$s/%1$s.php', $this->connect_plugin_slug ) ) ) {
