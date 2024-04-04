@@ -5,7 +5,7 @@
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'aa938905cb40e8c6f608d3a5ac8a29dd1d3103a0',
+        'reference' => '71b175e4b060ef195c8afc79a49c48ae62218958',
         'name' => 'instawp/hosting-migration',
         'dev' => true,
     ),
@@ -18,7 +18,7 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
-            'reference' => 'fc004a2b7bca8f37d4f56c8ed66eb3b8c6184d5d',
+            'reference' => '42bf5c6c914c4e33dc210a4a1b17c5934586f6d1',
             'dev_requirement' => false,
         ),
         'instawp/hosting-migration' => array(
@@ -27,7 +27,7 @@
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'aa938905cb40e8c6f608d3a5ac8a29dd1d3103a0',
+            'reference' => '71b175e4b060ef195c8afc79a49c48ae62218958',
             'dev_requirement' => false,
         ),
         'wp-cli/wp-config-transformer' => array(

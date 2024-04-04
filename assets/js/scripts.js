@@ -34,12 +34,12 @@
                         }, 500);
 
                         setTimeout(function () {
-                            window.open(response.data.redirect_url);
+                            window.open(response.data.redirect_url, '_self');
                         }, 1000);
 
                         setTimeout(function () {
                             el_connect_btn.html('Started...');
-                            el_connect_guide.html('Migration started in different window..')
+                            el_connect_guide.html('Migration is going to be started...')
                         }, 500);
 
                         el_connect_btn.removeClass('doing-ajax').addClass('done');

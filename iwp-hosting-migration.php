@@ -11,15 +11,18 @@
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
+use InstaWP\Connect\Helpers\Helper;
+use InstaWP\Connect\Helpers\Installer;
+
 defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.1' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.2' );
 
-defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'apikey' );
-defined( 'INSTAWP_ENVIRONMENT' ) || define( 'INSTAWP_ENVIRONMENT', 'app' );
-defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
+defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', '2S7tJcHRiQ2gcEehF3u914pXoVIpioc2KgM6Hm78' );
+defined( 'INSTAWP_API_URL' ) || define( 'INSTAWP_API_URL', 'https://stage.instawp.io' );
+defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate/bluehost' );
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 	class IWP_HOSTING_MIG_Main {
@@ -30,18 +33,19 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		private $api_key;
 		private $api_url;
 		private $connect_id;
-		private $connect_plugin_slug;
+		private $connect_uuid;
+		private $connect_plugin_slug = 'instawp-connect';
 		private $redirect_url;
 
 		function __construct() {
 
 			self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
 
-			$this->api_key             = $this->get_api_data();
-			$this->api_url             = rtrim( $this->get_api_data( 'api_url' ), '/' );
-			$this->connect_id          = $this->get_api_data( 'connect_id' );
-			$this->connect_plugin_slug = 'instawp-connect';
-			$this->redirect_url        = esc_url( $this->api_url . '/' . INSTAWP_MIGRATE_ENDPOINT . '?d_id=' . $this->connect_id );
+			$this->api_key      = Helper::get_api_key( false, INSTAWP_API_KEY );
+			$this->api_url      = Helper::get_api_domain( INSTAWP_API_URL );
+			$this->connect_id   = Helper::get_connect_id();
+			$this->connect_uuid = Helper::get_connect_uuid();
+			$this->redirect_url = esc_url( $this->api_url . '/' . INSTAWP_MIGRATE_ENDPOINT . '?d_id=' . $this->connect_uuid );
 
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
@@ -62,6 +66,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
+
 			// Install and activate the plugin
 			if ( ! is_plugin_active( sprintf( '%1$s/%1$s.php', $this->connect_plugin_slug ) ) ) {
 				$params    = array(
@@ -71,7 +76,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 						'activate' => true,
 					)
 				);
-				$installer = new \InstaWP\Connect\Helpers\Installer( $params );
+				$installer = new Installer( $params );
 				$response  = $installer->start();
 
 				wp_send_json_success(
@@ -82,19 +87,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				);
 			}
 
-
-			if ( get_option( 'instawp_bh_set_api_options' ) != 'yes' ) {
-
-				$this->set_api_data( 'api_url', $this->get_api_data( 'api_url' ) );
-				$this->set_api_data( 'api_key', $this->get_api_data() );
-
-				update_option( 'instawp_bh_set_api_options', 'yes' );
-			}
-
 			// Connect the website with InstaWP server
-			if ( function_exists( 'instawp' ) && empty( $this->connect_id ) ) {
+			if ( empty( Helper::get_api_key() ) ) {
 
-				$connect_response = InstaWP_Setting::instawp_generate_api_key( $this->api_key, true );
+				$connect_response = Helper::instawp_generate_api_key( $this->api_key );
 
 				if ( ! $connect_response ) {
 					wp_send_json_error(
@@ -244,3 +240,33 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
 IWP_HOSTING_MIG_Main::instance();
+
+
+add_action( 'wp_head', function () {
+	if ( isset( $_GET['debug'] ) ) {
+
+//		delete_option( 'instawp_api_options' );
+
+//		echo "<pre>";
+//		print_r( \InstaWP\Connect\Helpers\Option::get_option( 'instawp_api_options' ) );
+//		echo "</pre>";
+
+
+
+
+
+
+
+
+
+
+		
+
+
+
+
+
+
+		die();
+	}
+}, 0 );
