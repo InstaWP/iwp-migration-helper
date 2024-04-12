@@ -10,9 +10,13 @@ You need to set these values in `iwp-hosting-migration.php` file:
 2. API Domain should be https://app.instawp.io
 3. If you don't know the slug yet, you can just use the value `migrate` for `INSTAWP_MIGRATE_ENDPOINT` 
 
+```
 defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', '<api key>' );
+
 defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
+
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate/<slug>' );
+```
 
 ## Walkthrough
 https://www.youtube.com/watch?v=8yY1UBSas0M
