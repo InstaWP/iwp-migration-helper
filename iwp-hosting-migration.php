@@ -3,7 +3,7 @@
 	Plugin Name: InstaWP Hosting Migration
 	Plugin URI: https://instawp.com/hosting-migration/
 	Description: Migration helper plugin for hosting providers.
-	Version: 1.0.0
+	Version: 1.0.1
 	Text Domain: iwp-hosting-migration
 	Author: InstaWP Team
 	Author URI: https://instawp.com/
@@ -20,9 +20,9 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.2' );
 
-defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'X2MgiS1X5or1imiaentrlPlOjlokJncaAlHpOt6J' );
-defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://stage.instawp.io' );
-defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate/bluehost' );
+defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'UEnRAKn0JjITToIhN5G3ij8mTr1mK8lKwuhv6L5p' );
+defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
+defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 	class IWP_HOSTING_MIG_Main {
@@ -131,9 +131,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 		function display_migration_notice() {
 
-			$btn_label    = esc_html__( 'Connect' );
-			$redirect_url = '';
-			$classes      = array(
+			$auto_activate_mig = defined( 'INSTAWP_AUTO_ACTIVATE_MIGRATION' ) && INSTAWP_AUTO_ACTIVATE_MIGRATION;
+			$btn_label         = esc_html__( 'Connect' );
+			$redirect_url      = '';
+			$classes           = array(
 				'notice',
 				'notice-warning',
 				'iwp-hosting-mig-wrap'
@@ -150,8 +151,18 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				$guide_message = esc_html__( 'Website is not connected.' );
 			}
 
+			if ( $auto_activate_mig ) {
+				$classes[] = 'auto-activate-migration';
+			}
+
 			echo '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">';
-			echo '<p>' . esc_html__( 'Your website will be connected with InstaWP and then you can initiate the migration from other website to this website.' ) . '</p>';
+
+			if ( $auto_activate_mig ) {
+				echo '<p>' . esc_html__( 'You are being redirected to the site migrator tool..' ) . '</p>';
+			} else {
+				echo '<p>' . esc_html__( 'Your website will be connected with InstaWP and then you can initiate the migration from other website to this website.' ) . '</p>';
+			}
+
 			echo '<div class="mig-button-wrap">';
 			echo '<span class="mig-guide-text">' . $guide_message . '</span>';
 			echo '<span class="mig-button" data-redirect="' . $redirect_url . '">' . $btn_label . '</span>';
@@ -241,18 +252,3 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
 IWP_HOSTING_MIG_Main::instance();
-
-
-add_action( 'wp_head', function () {
-	if ( isset( $_GET['debug'] ) ) {
-
-//		delete_option( 'instawp_api_options' );
-
-		echo "<pre>";
-		print_r( \InstaWP\Connect\Helpers\Option::get_option( 'instawp_api_options' ) );
-		echo "</pre>";
-
-
-		die();
-	}
-}, 0 );

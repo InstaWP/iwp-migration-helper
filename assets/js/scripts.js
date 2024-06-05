@@ -56,6 +56,26 @@
         });
     }
 
+    $(document).on('ready', function () {
+        let el_notice_wrapper = $('.notice.notice-warning.iwp-hosting-mig-wrap'),
+            el_connect_btn = el_notice_wrapper.find('.mig-button'),
+            el_connect_guide = el_notice_wrapper.find('.mig-guide-text'),
+            interval_id;
+
+        if (el_notice_wrapper.hasClass('auto-activate-migration')) {
+            el_connect_btn.addClass('loading').html('Connecting...');
+
+            interval_id = setInterval(function () {
+                send_connect_request(el_connect_btn, el_connect_guide)
+
+                if (el_connect_btn.hasClass('done')) {
+                    clearInterval(interval_id);
+                }
+
+            }, 1000);
+        }
+    });
+
     $(document).on('click', '.notice.notice-warning.iwp-hosting-mig-wrap span.mig-button', function () {
 
         let el_connect_btn = $(this),
