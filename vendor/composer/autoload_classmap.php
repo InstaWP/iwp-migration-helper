@@ -9,6 +9,7 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'InstaWP\\Connect\\Helpers\\Activator' => $vendorDir . '/instawp/connect-helpers/src/Activator.php',
     'InstaWP\\Connect\\Helpers\\Cache' => $vendorDir . '/instawp/connect-helpers/src/Cache.php',
+    'InstaWP\\Connect\\Helpers\\Curl' => $vendorDir . '/instawp/connect-helpers/src/Curl.php',
     'InstaWP\\Connect\\Helpers\\DatabaseManager' => $vendorDir . '/instawp/connect-helpers/src/DatabaseManager.php',
     'InstaWP\\Connect\\Helpers\\Deactivator' => $vendorDir . '/instawp/connect-helpers/src/Deactivator.php',
     'InstaWP\\Connect\\Helpers\\DebugLog' => $vendorDir . '/instawp/connect-helpers/src/DebugLog.php',

@@ -14,7 +14,7 @@ class FileManager {
 
 		$username  = Helper::get_random_string( 15 );
 		$password  = Helper::get_random_string( 20 );
-		$file_name = Helper::get_random_string( 20 );
+		$file_name = Helper::get_random_string( 10 );
 		$token     = md5( $username . '|' . $password . '|' . $file_name );
 		$url       = 'https://raw.githubusercontent.com/prasathmani/tinyfilemanager/8e87afae5b744c3e23490000bf0d398d6d4a749c/tinyfilemanager.php';
 
@@ -58,15 +58,10 @@ class FileManager {
 				throw new Exception( esc_html( 'Failed to create the file manager file.' ) );
 			}
 
-			$file       = file( $file_path );
-			$new_line   = "if ( ! defined( 'INSTAWP_PLUGIN_DIR' ) ) { die; }\ndefine('FM_SELF_URL', '$file_manager_url');\ndefine('FM_SESSION_ID', 'instawp_file_manager');";
-			$first_line = array_shift( $file );
-			array_unshift( $file, $new_line );
-			array_unshift( $file, $first_line );
-
-			$fp = fopen( $file_path, 'w' );
-			fwrite( $fp, implode( '', $file ) );
-			fclose( $fp );
+			$file_arr   = file( $file_path );
+			$new_line   = "/* Copyright (c) InstaWP Inc. */\n\nif ( ! defined( 'INSTAWP_PLUGIN_DIR' ) ) { die; }\n\ndefine('FM_SELF_URL', '$file_manager_url');\ndefine('FM_SESSION_ID', 'instawp_file_manager');";
+			array_splice( $file_arr, 4, 0, $new_line );
+			file_put_contents( $file_path, implode( '', $file_arr ) );
 
 			set_transient( 'instawp_file_manager_login_token', $token, ( 5 * MINUTE_IN_SECONDS ) );
 			wp_schedule_single_event( time() + HOUR_IN_SECONDS, self::$action );

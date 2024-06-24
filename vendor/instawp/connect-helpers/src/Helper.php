@@ -66,6 +66,14 @@ class Helper {
 	public static function get_api_domain( $default_domain = '' ) {
 		$api_options = Option::get_option( 'instawp_api_options' );
 
+		if ( empty( $default_domain ) && defined( 'INSTAWP_API_DOMAIN_PROD' ) ) {
+			$default_domain = INSTAWP_API_DOMAIN_PROD;
+		}
+
+		if ( empty( $default_domain ) ) {
+			$default_domain = esc_url_raw( 'https://app.instawp.io' );
+		}
+
 		return self::get_args_option( 'api_url', $api_options, $default_domain );
 	}
 
@@ -124,8 +132,12 @@ class Helper {
 		try {
 			if ( $path !== false && $path != '' && file_exists( $path ) ) {
 				foreach ( new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path, \FilesystemIterator::SKIP_DOTS ) ) as $object ) {
-					$bytes_total += $object->getSize();
-					$files_total ++;
+					try {
+						$bytes_total += $object->getSize();
+						++ $files_total;
+					} catch ( \Exception $e ) {
+						continue;
+					}
 				}
 			}
 		} catch ( \Exception $e ) {
@@ -137,7 +149,7 @@ class Helper {
 		];
 	}
 
-	public static function is_on_wordpress_org( $slug, $type = 'plugin' ) {
+	public static function is_on_wordpress_org( $slug, $type ) {
 		$api_url  = 'https://api.wordpress.org/' . ( $type === 'plugin' ? 'plugins' : 'themes' ) . '/info/1.2/';
 		$response = wp_remote_get( add_query_arg( [
 			'action'  => $type . '_information',
