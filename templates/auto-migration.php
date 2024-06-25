@@ -6,13 +6,13 @@
 ?>
 
 <div class="iwp-auto-migration">
-    <h3 class="iwp-text-header">We have detected a website “source.instawp.xyz” which you used to create a demo site.</h3>
-    <p class="iwp-text-content">Transfer/Migrate the site here?</p>
+    <h3 class="iwp-text-header"><?php _e( 'We have detected a website <span></span> which you used to create a demo site.', 'iwp-hosting-migration' ); ?></h3>
+    <p class="iwp-text-content"><?php esc_attr_e( 'Transfer/Migrate the site here?', 'iwp-hosting-migration' ); ?></p>
     <button class="iwp-btn-transfer" type="button">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1.33301 1.33398V5.50065H1.81761M14.6148 7.16732C14.2047 3.87872 11.3994 1.33398 7.99967 1.33398C5.20186 1.33398 2.80658 3.05746 1.81761 5.50065M1.81761 5.50065H5.49967M14.6663 14.6673V10.5007H14.1817M14.1817 10.5007C13.1928 12.9438 10.7975 14.6673 7.99967 14.6673C4.59999 14.6673 1.79467 12.1226 1.38459 8.83398M14.1817 10.5007H10.4997" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span>Transfer Site</span>
+        <span><?php esc_attr_e( 'Transfer Site', 'iwp-hosting-migration' ); ?></span>
     </button>
     <svg class="iwp-info-shape" width="135" height="157" viewBox="0 0 135 157" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clip-path="url(#clip0_30752_25277)">
@@ -148,4 +148,4 @@
     </svg>
 </div>
 
-<iframe id="myIframe" src="https://iframe.instawp.xyz/auto-migration/" style="width:0; height:0;"></iframe>
+<iframe id="myIframe" src="https://iframe.instawp.xyz/auto-migration/?adasd=12324" style="width:0; height:0;"></iframe>

@@ -103,6 +103,11 @@
     margin: 0 0 16px 0;
 }
 
+.iwp-auto-migration h3.iwp-text-header > span {
+    text-decoration: underline;
+    color: #14855f;
+}
+
 .iwp-auto-migration p.iwp-text-content {
     margin: 0 0 16px 0;
     font-size: 16px;
@@ -132,7 +137,7 @@
     border-color: #08a571;
 }
 
-.iwp-auto-migration .iwp-info-shape{
+.iwp-auto-migration .iwp-info-shape {
     position: absolute;
     bottom: 0;
     right: 0;

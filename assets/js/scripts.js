@@ -74,16 +74,22 @@
             }, 1000);
         }
 
+        console.log(plugin_object.auto_migration);
+
         if (typeof plugin_object.auto_migration !== 'undefined' && plugin_object.auto_migration) {
             window.addEventListener('message', (event) => {
                 if (event.origin === 'https://iframe.instawp.xyz') {
 
                     let insta_site_id = typeof event.data.insta_site_id !== 'undefined' ? event.data.insta_site_id : '',
                         insta_site_url = typeof event.data.insta_site_url !== 'undefined' ? event.data.insta_site_url : '',
-                        el_iwp_auto_migration = $('.iwp-auto-migration');
+                        el_iwp_auto_migration = $('.iwp-auto-migration'),
+                        regex = /^(?:https?:\/\/)?(?:www\.)?([^\/]+)/;
+
+                    insta_site_url = insta_site_url.replace(regex, '$1');
 
                     if (insta_site_id && insta_site_url) {
-                        el_iwp_auto_migration.fadeIn();
+                        el_iwp_auto_migration.find('.iwp-text-header > span').html(insta_site_url);
+                        el_iwp_auto_migration.fadeIn().css('display', 'inline-block');
                     }
                 }
             }, false);
