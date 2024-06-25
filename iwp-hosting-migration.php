@@ -20,7 +20,7 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.2' );
 
-defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'UEnRAKn0JjITToIhN5G3ij8mTr1mK8lKwuhv6L5p' );
+defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'cPvRbZxMaKOMSIYnE4rDFBW2kXh0zeW22ZRLjZRA' );
 defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
 
@@ -68,6 +68,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
+			$insta_connect_uuid = isset( $_POST['insta_connect_uuid'] ) ? sanitize_text_field( $_POST['insta_connect_uuid'] ) : '';
+
 			// Install and activate the plugin
 			if ( ! is_plugin_active( sprintf( '%1$s/%1$s.php', $this->connect_plugin_slug ) ) ) {
 				$params    = array(
@@ -112,6 +114,11 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			// Ready to start the migration
 			if ( function_exists( 'instawp' ) && ! empty( $this->connect_id ) ) {
+
+				if ( ! empty( $insta_connect_uuid ) ) {
+					$this->redirect_url .= '&s_id=' . $insta_connect_uuid;
+				}
+
 				wp_send_json_success(
 					array(
 						'message'      => esc_html__( 'Ready to start migration.' ),
@@ -184,10 +191,14 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		function admin_scripts() {
 
 			$localize_scripts = array(
-				'ajax_url'       => admin_url( 'admin-ajax.php' ),
-				'copy_text'      => esc_html__( 'Copied.', 'iwp-hosting-mig' ),
-				'auto_migration' => defined( 'INSTAWP_AUTO_MIGRATION' ) && INSTAWP_AUTO_MIGRATION,
+				'ajax_url'          => admin_url( 'admin-ajax.php' ),
+				'copy_text'         => esc_html__( 'Copied.', 'iwp-hosting-mig' ),
+				'text_transferring' => esc_html__( 'Transferring...', 'iwp-hosting-mig' ),
 			);
+
+			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
+				$localize_scripts['auto_migration'] = INSTAWP_AUTO_MIGRATION;
+			}
 
 			wp_enqueue_script( 'iwp-hosting-mig', plugins_url( '/assets/js/scripts.js', __FILE__ ), array( 'jquery' ), self::$_script_version );
 			wp_localize_script( 'iwp-hosting-mig', 'iwp_hosting_mig', $localize_scripts );

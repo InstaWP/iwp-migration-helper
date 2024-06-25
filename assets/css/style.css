@@ -70,18 +70,6 @@
     border-radius: 3px;
 }
 
-@keyframes loading {
-    0% {
-        transform: rotate(0deg)
-    }
-    50% {
-        transform: rotate(180deg)
-    }
-    100% {
-        transform: rotate(360deg)
-    }
-}
-
 /**
  * Auto migration
  */
@@ -132,6 +120,10 @@
     transition: 0.3s;
 }
 
+.iwp-auto-migration .iwp-btn-transfer.loading > svg {
+    animation: loading 1s linear infinite;
+}
+
 .iwp-auto-migration .iwp-btn-transfer:hover {
     background: #08a571;
     border-color: #08a571;
@@ -145,5 +137,14 @@
 }
 
 
-
-
+@keyframes loading {
+    0% {
+        transform: rotate(0deg)
+    }
+    50% {
+        transform: rotate(180deg)
+    }
+    100% {
+        transform: rotate(360deg)
+    }
+}
