@@ -131,6 +131,13 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 		function display_migration_notice() {
 
+			// auto-migration.php
+			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) && INSTAWP_AUTO_MIGRATION ) {
+				require_once IWP_HOSTING_MIG_PLUGIN_DIR . 'templates/auto-migration.php';
+
+				return;
+			}
+
 			$auto_activate_mig = defined( 'INSTAWP_AUTO_ACTIVATE_MIGRATION' ) && INSTAWP_AUTO_ACTIVATE_MIGRATION;
 			$btn_label         = esc_html__( 'Connect' );
 			$redirect_url      = '';
@@ -177,8 +184,9 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		function admin_scripts() {
 
 			$localize_scripts = array(
-				'ajax_url'  => admin_url( 'admin-ajax.php' ),
-				'copy_text' => esc_html__( 'Copied.', 'iwp-hosting-mig' ),
+				'ajax_url'       => admin_url( 'admin-ajax.php' ),
+				'copy_text'      => esc_html__( 'Copied.', 'iwp-hosting-mig' ),
+				'auto_migration' => defined( 'INSTAWP_AUTO_MIGRATION' ) && INSTAWP_AUTO_MIGRATION,
 			);
 
 			wp_enqueue_script( 'iwp-hosting-mig', plugins_url( '/assets/js/scripts.js', __FILE__ ), array( 'jquery' ), self::$_script_version );

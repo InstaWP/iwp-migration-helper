@@ -5,7 +5,6 @@
 (function ($, window, document, plugin_object) {
     "use strict";
 
-
     function send_connect_request(el_connect_btn, el_connect_guide) {
 
         if (el_connect_btn.hasClass('doing-ajax') || el_connect_btn.hasClass('done')) {
@@ -73,6 +72,21 @@
                 }
 
             }, 1000);
+        }
+
+        if (typeof plugin_object.auto_migration !== 'undefined' && plugin_object.auto_migration) {
+            window.addEventListener('message', (event) => {
+                if (event.origin === 'https://iframe.instawp.xyz') {
+
+                    let insta_site_id = typeof event.data.insta_site_id !== 'undefined' ? event.data.insta_site_id : '',
+                        insta_site_url = typeof event.data.insta_site_url !== 'undefined' ? event.data.insta_site_url : '',
+                        el_iwp_auto_migration = $('.iwp-auto-migration');
+
+                    if (insta_site_id && insta_site_url) {
+                        el_iwp_auto_migration.fadeIn();
+                    }
+                }
+            }, false);
         }
     });
 
