@@ -27,7 +27,7 @@ class IWP_HOSTING_Ajax {
 		}
 
 		if ( is_plugin_active( sprintf( '%1$s/%1$s.php', 'instawp-connect' ) ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Connect plugin is already installed and activated.' ) ] );
+			wp_send_json_success( [ 'message' => esc_html__( 'Connect plugin is already installed and activated.' ) ] );
 		}
 
 		$installer = new Installer(
@@ -47,7 +47,7 @@ class IWP_HOSTING_Ajax {
 	function set_api_key() {
 
 		if ( ! empty( Helper::get_api_key() ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Website is already connected.' ) ] );
+			wp_send_json_success( [ 'message' => esc_html__( 'Website is already connected.' ) ] );
 		}
 
 		$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ) );
@@ -72,8 +72,9 @@ class IWP_HOSTING_Ajax {
 			wp_send_json_error( [ 'message' => Helper::get_args_option( 'message', $install_connect_res ) ] );
 		}
 
-		$iwp_demo_site_connect_id   = Helper::get_args_option( 'connect_id', $install_connect_res );
-		$iwp_demo_site_connect_uuid = Helper::get_args_option( 'connect_uuid', $install_connect_res );
+		$install_connect_res_data   = Helper::get_args_option( 'data', $install_connect_res );
+		$iwp_demo_site_connect_id   = Helper::get_args_option( 'connect_id', $install_connect_res_data );
+		$iwp_demo_site_connect_uuid = Helper::get_args_option( 'connect_uuid', $install_connect_res_data );
 
 		if ( empty( $iwp_demo_site_connect_id ) || empty( $iwp_demo_site_connect_uuid ) ) {
 			wp_send_json_error( [ 'message' => esc_html__( 'Could not get proper response from connect install on the demo site.' ), 'response' => $install_connect_res ] );
@@ -95,17 +96,35 @@ class IWP_HOSTING_Ajax {
 			wp_send_json_error( [ 'message' => esc_html__( 'Could not find demo site details.' ) ] );
 		}
 
-		$initiate_push_args = [ 'source_connect_id' => $iwp_demo_site_connect_id ];
+		global $wp_version;
+
+		$migrate_key        = Helper::get_random_string( 40 );
+		$migrate_settings   = InstaWP_Tools::get_migrate_settings();
+		$api_signature      = hash( 'sha512', $migrate_key . wp_generate_uuid4() );
+		$dest_file_url      = InstaWP_Tools::generate_destination_file( $migrate_key, $api_signature );
+		$initiate_push_args = [
+			'source_connect_id'  => $iwp_demo_site_connect_id,
+			'php_version'        => PHP_VERSION,
+			'wp_version'         => $wp_version,
+			'plugin_version'     => INSTAWP_PLUGIN_VERSION,
+			'active_plugins'     => Option::get_option( 'active_plugins' ),
+			'migrate_settings'   => $migrate_settings,
+			'migrate_key'        => $migrate_key,
+			'dest_url'           => $dest_file_url,
+			'api_signature'      => $api_signature,
+			'iwp_auto_migration' => true,
+		];
 		$initiate_push_res  = Curl::do_curl( 'migrates-v3/push', $initiate_push_args );
 
 		if ( isset( $initiate_push_res['success'] ) && $initiate_push_res['success'] !== true ) {
 			wp_send_json_error( [ 'message' => Helper::get_args_option( 'message', $initiate_push_res ) ] );
 		}
 
-		$iwp_migrate_id           = Helper::get_args_option( 'migrate_id', $initiate_push_res );
-		$iwp_migrate_key          = Helper::get_args_option( 'migrate_key', $initiate_push_res );
-		$iwp_migrate_uuid         = Helper::get_args_option( 'migrate_uuid', $initiate_push_res );
-		$iwp_migrate_tracking_url = Helper::get_args_option( 'tracking_url', $initiate_push_res );
+		$initiate_push_res_data   = Helper::get_args_option( 'data', $initiate_push_res );
+		$iwp_migrate_id           = Helper::get_args_option( 'migrate_id', $initiate_push_res_data );
+		$iwp_migrate_key          = Helper::get_args_option( 'migrate_key', $initiate_push_res_data );
+		$iwp_migrate_uuid         = Helper::get_args_option( 'uuid', $initiate_push_res_data );
+		$iwp_migrate_tracking_url = Helper::get_args_option( 'tracking_url', $initiate_push_res_data );
 
 		if ( empty( $iwp_migrate_id ) || empty( $iwp_migrate_key ) || empty( $iwp_migrate_uuid ) || empty( $iwp_migrate_tracking_url ) ) {
 			wp_send_json_error( [ 'message' => esc_html__( 'Could not get proper data from migration initiation response.' ) ] );
@@ -116,7 +135,7 @@ class IWP_HOSTING_Ajax {
 		update_option( 'iwp_migrate_uuid', $iwp_migrate_uuid );
 		update_option( 'iwp_migrate_tracking_url', $iwp_migrate_tracking_url );
 
-		wp_send_json_success( [ 'message' => esc_html__( 'Migration initiated successfully.' ) ] );
+		wp_send_json_success( [ 'message' => esc_html__( 'Migration initiated successfully. You are going to be redirected to the tracking page.' ), 'iwp_migrate_tracking_url' => $iwp_migrate_tracking_url ] );
 	}
 }
 

@@ -91,6 +91,10 @@
             }, 1000);
         }
 
+        if (localStorage.getItem('iwp_scan_demo_site') !== 'yes') {
+            window.location.href = plugin_object.iwp_auto_migrate_url;
+        }
+
         if (typeof query_params.iwp_demo_site_id !== 'undefined' && typeof query_params.iwp_demo_site_url !== 'undefined') {
             if (localStorage.getItem('iwp_scan_demo_site') !== 'yes') {
                 localStorage.setItem('iwp_scan_demo_site', 'yes');
@@ -123,6 +127,7 @@
             el_transfer_btn_text = el_transfer_btn.find('span'),
             el_auto_migration_wrap = el_transfer_btn.parent(),
             el_iwp_text_content = el_auto_migration_wrap.find('.iwp-text-content'),
+            el_iwp_progress_bar = el_auto_migration_wrap.find('.iwp-progress-bar'),
             interval_id;
 
         if (el_transfer_btn.hasClass('loading')) {
@@ -136,31 +141,43 @@
             action: 'iwp_install_plugin',
         })
             .then(function (response) {
-                el_iwp_text_content.html(response.message);
+                el_iwp_text_content.html(response.data.message);
 
-                return $.post(plugin_object.ajax_url, {
-                    action: 'iwp_set_api_key',
-                });
+                if (response.success) {
+                    return $.post(plugin_object.ajax_url, {
+                        action: 'iwp_set_api_key',
+                    });
+                }
             })
             .then(function (response) {
-                el_iwp_text_content.html(response.message);
+                el_iwp_text_content.html(response.data.message);
 
-                return $.post(plugin_object.ajax_url, {
-                    action: 'iwp_connect_demo_site',
-                });
+                if (response.success) {
+                    return $.post(plugin_object.ajax_url, {
+                        action: 'iwp_connect_demo_site',
+                    });
+                }
             })
             .then(function (response) {
-                el_iwp_text_content.html(response.message);
+                el_iwp_text_content.html(response.data.message);
 
-                return $.post(plugin_object.ajax_url, {
-                    action: 'iwp_initiate_migration',
-                });
+                if (response.success) {
+                    return $.post(plugin_object.ajax_url, {
+                        action: 'iwp_initiate_migration',
+                    });
+                }
             })
             .then(function (response) {
-                el_iwp_text_content.html(response.message);
+                el_iwp_text_content.html(response.data.message);
+
+                if (typeof response.data.iwp_migrate_tracking_url !== 'undefined') {
+                    setTimeout(function () {
+                        window.location.href = response.data.iwp_migrate_tracking_url;
+                    }, 1500);
+                }
             })
             .fail(function (error) {
-                console.error('Error:', error);
+                console.log('Error:', error);
             });
 
         // interval_id = setInterval(function () {
