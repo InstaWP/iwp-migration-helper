@@ -17,7 +17,6 @@
             context: this,
             data: {
                 'action': 'instawp_connect_website',
-                'insta_connect_uuid': el_connect_btn.data('insta-connect-uuid'),
             },
             beforeSend: function () {
                 el_connect_btn.addClass('doing-ajax');
@@ -56,11 +55,28 @@
         });
     }
 
+    function get_query_params() {
+        var params = {};
+        var queryString = window.location.search.substring(1);
+        var queryArray = queryString.split('&');
+
+        for (var i = 0; i < queryArray.length; i++) {
+            var pair = queryArray[i].split('=');
+            params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        }
+
+        return params;
+    }
+
+
     $(document).on('ready', function () {
         let el_notice_wrapper = $('.notice.notice-warning.iwp-hosting-mig-wrap'),
             el_connect_btn = el_notice_wrapper.find('.mig-button'),
+            el_transfer_btn = $('button.iwp-btn-transfer'),
             el_connect_guide = el_notice_wrapper.find('.mig-guide-text'),
+            query_params = get_query_params(),
             interval_id;
+
 
         if (el_notice_wrapper.hasClass('auto-activate-migration')) {
             el_connect_btn.addClass('loading').html('Connecting...');
@@ -75,30 +91,29 @@
             }, 1000);
         }
 
-        if (typeof plugin_object.auto_migration !== 'undefined' && plugin_object.auto_migration) {
-            window.addEventListener('message', (event) => {
+        if (typeof query_params.iwp_demo_site_id !== 'undefined' && typeof query_params.iwp_demo_site_url !== 'undefined') {
+            if (localStorage.getItem('iwp_scan_demo_site') !== 'yes') {
+                localStorage.setItem('iwp_scan_demo_site', 'yes');
 
-                console.log(event.data);
+                localStorage.setItem('iwp_demo_site_id', query_params.iwp_demo_site_id);
+                localStorage.setItem('iwp_demo_site_url', query_params.iwp_demo_site_url);
 
-                if (event.origin === 'https://iframe.instawp.xyz') {
+                el_transfer_btn.parent().find('.iwp-text-header span').html(query_params.iwp_demo_site_url);
 
-                    let insta_site_id = typeof event.data.insta_site_id !== 'undefined' ? event.data.insta_site_id : '',
-                        insta_site_url = typeof event.data.insta_site_url !== 'undefined' ? event.data.insta_site_url : '',
-                        insta_connect_uuid = typeof event.data.insta_connect_uuid !== 'undefined' ? event.data.insta_connect_uuid : '',
-                        el_iwp_auto_migration = $('.iwp-auto-migration'),
-                        regex = /^(?:https?:\/\/)?(?:www\.)?([^\/]+)/,
-                        insta_site_url_raw = insta_site_url.replace(regex, '$1');
-
-                    if (insta_site_id && insta_site_url_raw) {
-                        el_iwp_auto_migration.find('.iwp-text-header > span').html(insta_site_url_raw);
-                        el_iwp_auto_migration.find('.iwp-btn-transfer')
-                            .data('insta-site-id', insta_site_id)
-                            .data('insta-site-url', insta_site_url)
-                            .data('insta-connect-uuid', insta_connect_uuid);
-                        el_iwp_auto_migration.fadeIn().css('display', 'inline-block');
+                $.ajax({
+                    type: 'POST',
+                    url: plugin_object.ajax_url,
+                    context: this,
+                    data: {
+                        'action': 'instawp_store_demo_site_details',
+                        'iwp_demo_site_id': query_params.iwp_demo_site_id,
+                        'iwp_demo_site_url': query_params.iwp_demo_site_url,
+                    },
+                    success: function (response) {
+                        console.log(response);
                     }
-                }
-            }, false);
+                });
+            }
         }
     });
 
@@ -117,15 +132,46 @@
         el_transfer_btn.addClass('loading');
         el_transfer_btn_text.html(plugin_object.text_transferring);
 
-        interval_id = setInterval(function () {
-            send_connect_request(el_transfer_btn, el_iwp_text_content, el_transfer_btn_text)
+        $.post(plugin_object.ajax_url, {
+            action: 'iwp_install_plugin',
+        })
+            .then(function (response) {
+                el_iwp_text_content.html(response.message);
 
-            if (el_transfer_btn.hasClass('done')) {
-                clearInterval(interval_id);
-                el_transfer_btn.removeClass('loading');
-            }
+                return $.post(plugin_object.ajax_url, {
+                    action: 'iwp_set_api_key',
+                });
+            })
+            .then(function (response) {
+                el_iwp_text_content.html(response.message);
 
-        }, 1000);
+                return $.post(plugin_object.ajax_url, {
+                    action: 'iwp_connect_demo_site',
+                });
+            })
+            .then(function (response) {
+                el_iwp_text_content.html(response.message);
+
+                return $.post(plugin_object.ajax_url, {
+                    action: 'iwp_initiate_migration',
+                });
+            })
+            .then(function (response) {
+                el_iwp_text_content.html(response.message);
+            })
+            .fail(function (error) {
+                console.error('Error:', error);
+            });
+
+        // interval_id = setInterval(function () {
+        //     send_connect_request(el_transfer_btn, el_iwp_text_content, el_transfer_btn_text)
+        //
+        //     if (el_transfer_btn.hasClass('done')) {
+        //         clearInterval(interval_id);
+        //         el_transfer_btn.removeClass('loading');
+        //     }
+        //
+        // }, 1000);
     });
 
     $(document).on('click', '.notice.notice-warning.iwp-hosting-mig-wrap span.mig-button', function () {

@@ -20,8 +20,8 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.2.2' );
 
-defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'cPvRbZxMaKOMSIYnE4rDFBW2kXh0zeW22ZRLjZRA' );
-defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
+defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'fK4lczjgHqnezlpFcTD5K4x76a9TF0AUHHl7wKml' );
+defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://stage.instawp.io' );
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -29,38 +29,50 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 		protected static $_instance = null;
 		protected static $_script_version = null;
+		protected static $_connect_plugin_slug = 'instawp-connect';
 
-		private $api_key;
-		private $api_url;
-		private $connect_id;
-		private $connect_uuid;
-		private $connect_plugin_slug = 'instawp-connect';
 		private $redirect_url;
 
 		function __construct() {
 
-			self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
-
 			Helper::set_api_domain( INSTAWP_API_DOMAIN );
 
-			$this->api_key      = Helper::get_api_key( false, INSTAWP_API_KEY );
-			$this->api_url      = Helper::get_api_domain();
-			$this->connect_id   = Helper::get_connect_id();
-			$this->connect_uuid = Helper::get_connect_uuid();
-			$this->redirect_url = esc_url( $this->api_url . '/' . INSTAWP_MIGRATE_ENDPOINT . '?d_id=' . $this->connect_uuid );
+			self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
+			$this->redirect_url    = esc_url( sprintf( '%s/%s?d_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, Helper::get_connect_uuid() ) );
 
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
-
-			add_action( 'admin_init', array( $this, 'remove_instawp_plugin_page' ) );
 			add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 			add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
+			add_action( 'wp_ajax_instawp_store_demo_site_details', array( $this, 'store_demo_site_details' ) );
+			add_action( 'admin_init', array( $this, 'reset_auto_migration_details' ) );
 		}
 
-		function remove_instawp_plugin_page() {
-			remove_submenu_page( 'tools.php', 'instawp' );
-			add_filter( 'INSTAWP_CONNECT/Filters/display_menu_bar_icon', '__return_false' );
+		function reset_auto_migration_details() {
+			if ( current_user_can( 'manage_options' ) && isset( $_GET['reset_auto_migration'] ) && sanitize_text_field( $_GET['reset_auto_migration'] ) === 'yes' ) {
+				delete_option( 'iwp_demo_site_id' );
+				delete_option( 'iwp_demo_site_url' );
+			}
 		}
+
+		function store_demo_site_details() {
+			$iwp_demo_site_id  = isset( $_POST['iwp_demo_site_id'] ) ? sanitize_text_field( $_POST['iwp_demo_site_id'] ) : '';
+			$iwp_demo_site_url = isset( $_POST['iwp_demo_site_url'] ) ? sanitize_url( $_POST['iwp_demo_site_url'] ) : '';
+
+			if ( empty( $iwp_demo_site_id ) ) {
+				wp_send_json_error( array( 'message' => esc_html__( 'Empty demo site ID' ) ) );
+			}
+
+			if ( empty( $iwp_demo_site_url ) ) {
+				wp_send_json_error( array( 'message' => esc_html__( 'Empty demo site URL' ) ) );
+			}
+
+			update_option( 'iwp_demo_site_id', $iwp_demo_site_id );
+			update_option( 'iwp_demo_site_url', $iwp_demo_site_url );
+
+			wp_send_json_success();
+		}
+
 
 		function instawp_connect_website() {
 
@@ -68,10 +80,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			$insta_connect_uuid = isset( $_POST['insta_connect_uuid'] ) ? sanitize_text_field( $_POST['insta_connect_uuid'] ) : '';
-
 			// Install and activate the plugin
-			if ( ! is_plugin_active( sprintf( '%1$s/%1$s.php', $this->connect_plugin_slug ) ) ) {
+			if ( ! is_plugin_active( sprintf( '%1$s/%1$s.php', self::$_connect_plugin_slug ) ) ) {
 				$params    = array(
 					array(
 						'slug'     => 'instawp-connect',
@@ -93,7 +103,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			// Connect the website with InstaWP server
 			if ( empty( Helper::get_api_key() ) ) {
 
-				$connect_response = Helper::instawp_generate_api_key( $this->api_key );
+				$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ) );
 
 				if ( ! $connect_response ) {
 					wp_send_json_error(
@@ -113,10 +123,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			}
 
 			// Ready to start the migration
-			if ( function_exists( 'instawp' ) && ! empty( $this->connect_id ) ) {
+			if ( function_exists( 'instawp' ) && ! empty( Helper::get_connect_id() ) ) {
 
-				if ( ! empty( $insta_connect_uuid ) ) {
-					$this->redirect_url .= '&s_id=' . $insta_connect_uuid;
+				if ( ! empty( $demo_site_connect_uuid ) ) {
+					$this->redirect_url = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', Helper::get_api_domain(), admin_url() ) );
 				}
 
 				wp_send_json_success(
@@ -154,7 +164,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				'iwp-hosting-mig-wrap'
 			);
 
-			if ( ! empty( $this->connect_id ) ) {
+			if ( ! empty( Helper::get_connect_id() ) ) {
 				$guide_message = esc_html__( 'Website is connected.' );
 				$btn_label     = esc_html__( 'Start Migration' );
 				$classes[]     = 'connected';
@@ -197,7 +207,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			);
 
 			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
-				$localize_scripts['auto_migration'] = INSTAWP_AUTO_MIGRATION;
+				$localize_scripts['iwp_auto_migration']   = INSTAWP_AUTO_MIGRATION || INSTAWP_AUTO_MIGRATION == 'true';
+				$localize_scripts['iwp_auto_migrate_url'] = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', Helper::get_api_domain(), admin_url() ) );
 			}
 
 			wp_enqueue_script( 'iwp-hosting-mig', plugins_url( '/assets/js/scripts.js', __FILE__ ), array( 'jquery' ), self::$_script_version );
@@ -269,5 +280,6 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 }
 
 require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-ajax.php';
 
 IWP_HOSTING_MIG_Main::instance();
