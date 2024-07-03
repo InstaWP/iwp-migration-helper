@@ -40,6 +40,7 @@ class ComposerStaticInit9abf8aaa483f80c232ee7a59c615d590
         'InstaWP\\Connect\\Helpers\\Uninstaller' => __DIR__ . '/..' . '/instawp/connect-helpers/src/Uninstaller.php',
         'InstaWP\\Connect\\Helpers\\Updater' => __DIR__ . '/..' . '/instawp/connect-helpers/src/Updater.php',
         'InstaWP\\Connect\\Helpers\\WPConfig' => __DIR__ . '/..' . '/instawp/connect-helpers/src/WPConfig.php',
+        'InstaWP\\Connect\\Helpers\\WPScanner' => __DIR__ . '/..' . '/instawp/connect-helpers/src/WPScanner.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

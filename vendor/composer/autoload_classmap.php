@@ -21,4 +21,5 @@ return array(
     'InstaWP\\Connect\\Helpers\\Uninstaller' => $vendorDir . '/instawp/connect-helpers/src/Uninstaller.php',
     'InstaWP\\Connect\\Helpers\\Updater' => $vendorDir . '/instawp/connect-helpers/src/Updater.php',
     'InstaWP\\Connect\\Helpers\\WPConfig' => $vendorDir . '/instawp/connect-helpers/src/WPConfig.php',
+    'InstaWP\\Connect\\Helpers\\WPScanner' => $vendorDir . '/instawp/connect-helpers/src/WPScanner.php',
 );
