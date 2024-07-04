@@ -5,8 +5,11 @@
 
 use InstaWP\Connect\Helpers\Option;
 
-$iwp_demo_site_id  = Option::get_option( 'iwp_demo_site_id' );
 $iwp_demo_site_url = Option::get_option( 'iwp_demo_site_url', '' );
+
+//if ( empty( $iwp_demo_site_url ) ) {
+//	return;
+//}
 
 ?>
 
@@ -151,15 +154,4 @@ $iwp_demo_site_url = Option::get_option( 'iwp_demo_site_url', '' );
             </clipPath>
         </defs>
     </svg>
-
-<!--    <div class="iwp-progress-bar mt-6 hidden">-->
-<!--        <span class="inline-block mb-2 text-base font-sm">Migration Progress</span>-->
-<!--        <div class="relative w-[320px] bg-[#11bf855e] rounded-full">-->
-<!--            <div class="iwp-progress bg-[#0a6949] text-xs font-medium text-blue-100 text-center p-1.5 leading-none rounded-full" style="width: 45%">45%</div>-->
-<!--            <a class="iwp-tracking-url absolute top-[50%] right-[-100px] underline" style="transform: translateY(-50%);" href="#">Track Progress</a>-->
-<!--        </div>-->
-<!--    </div>-->
 </div>
-
-
-<!--<script src="https://cdn.tailwindcss.com"></script>-->
