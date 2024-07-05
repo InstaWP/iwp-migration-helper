@@ -98,6 +98,12 @@ class IWP_HOSTING_Ajax {
 
 		global $wp_version;
 
+		// Create InstaWP backup directory
+		InstaWP_Tools::create_instawpbackups_dir();
+
+		// Clean InstaWP backup directory
+		InstaWP_Tools::clean_instawpbackups_dir();
+
 		$migrate_key        = Helper::get_random_string( 40 );
 		$migrate_settings   = InstaWP_Tools::get_migrate_settings();
 		$api_signature      = hash( 'sha512', $migrate_key . wp_generate_uuid4() );
