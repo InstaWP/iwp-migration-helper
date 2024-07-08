@@ -44,7 +44,6 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
 			add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 			add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
-			add_action( 'wp_ajax_instawp_store_demo_site_details', array( $this, 'store_demo_site_details' ) );
 			add_action( 'admin_init', array( $this, 'reset_auto_migration_details' ) );
 		}
 
@@ -54,25 +53,6 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				delete_option( 'iwp_demo_site_url' );
 			}
 		}
-
-		function store_demo_site_details() {
-			$iwp_demo_site_id  = isset( $_POST['iwp_demo_site_id'] ) ? sanitize_text_field( $_POST['iwp_demo_site_id'] ) : '';
-			$iwp_demo_site_url = isset( $_POST['iwp_demo_site_url'] ) ? sanitize_url( $_POST['iwp_demo_site_url'] ) : '';
-
-			if ( empty( $iwp_demo_site_id ) ) {
-				wp_send_json_error( array( 'message' => esc_html__( 'Empty demo site ID' ) ) );
-			}
-
-			if ( empty( $iwp_demo_site_url ) ) {
-				wp_send_json_error( array( 'message' => esc_html__( 'Empty demo site URL' ) ) );
-			}
-
-			update_option( 'iwp_demo_site_id', $iwp_demo_site_id );
-			update_option( 'iwp_demo_site_url', $iwp_demo_site_url );
-
-			wp_send_json_success();
-		}
-
 
 		function instawp_connect_website() {
 
@@ -283,3 +263,25 @@ require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-ajax.php';
 
 IWP_HOSTING_MIG_Main::instance();
+
+
+add_action( 'wp_head', function () {
+	if ( isset( $_GET['debug'] ) ) {
+
+//		$demo_site_args     = [ 'email' => 'jaed@instawp.com' ];
+//		$demo_site_args_res = \InstaWP\Connect\Helpers\Curl::do_curl( 'sites/get-demo-site', $demo_site_args, [],'POST', 'v2', INSTAWP_API_KEY );
+//
+//		if ( isset( $demo_site_args_res['success'] ) && $demo_site_args_res['success'] !== true ) {
+//			wp_send_json_error( [ 'message' => Helper::get_args_option( 'message', $demo_site_args_res ) ] );
+//		}
+//
+//		$demo_site_args_res_data = Helper::get_args_option( 'data', $demo_site_args_res );
+//
+//		echo "<pre>";
+//		print_r( $demo_site_args_res_data );
+//		echo "</pre>";
+
+		die();
+	}
+}, 0 );
+

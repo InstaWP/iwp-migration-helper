@@ -90,33 +90,6 @@
 
             }, 1000);
         }
-
-        if (typeof query_params.iwp_demo_site_id !== 'undefined' && typeof query_params.iwp_demo_site_url !== 'undefined') {
-            localStorage.setItem('iwp_scan_demo_site', 'yes');
-            localStorage.setItem('iwp_demo_site_id', query_params.iwp_demo_site_id);
-            localStorage.setItem('iwp_demo_site_url', query_params.iwp_demo_site_url);
-
-            el_transfer_btn.parent().find('.iwp-text-header span').html(query_params.iwp_demo_site_url);
-
-            $.ajax({
-                type: 'POST',
-                url: plugin_object.ajax_url,
-                context: this,
-                data: {
-                    'action': 'instawp_store_demo_site_details',
-                    'iwp_demo_site_id': query_params.iwp_demo_site_id,
-                    'iwp_demo_site_url': query_params.iwp_demo_site_url,
-                },
-                success: function (response) {
-                    el_transfer_btn.parent().fadeIn();
-                    console.log(response);
-                }
-            });
-        }
-
-        if (localStorage.getItem('iwp_scan_demo_site') !== 'yes' && typeof plugin_object.iwp_auto_migrate_url !== 'undefined') {
-            window.location.href = plugin_object.iwp_auto_migrate_url;
-        }
     });
 
     $(document).on('click', 'button.iwp-btn-transfer', function () {
