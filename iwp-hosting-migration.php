@@ -3,7 +3,7 @@
 	Plugin Name: InstaWP Hosting Migration
 	Plugin URI: https://instawp.com/hosting-migration/
 	Description: Migration helper plugin for hosting providers.
-	Version: 1.0.1
+	Version: 1.0.2
 	Text Domain: iwp-hosting-migration
 	Author: InstaWP Team
 	Author URI: https://instawp.com/

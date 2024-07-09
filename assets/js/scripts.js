@@ -55,28 +55,11 @@
         });
     }
 
-    function get_query_params() {
-        var params = {};
-        var queryString = window.location.search.substring(1);
-        var queryArray = queryString.split('&');
-
-        for (var i = 0; i < queryArray.length; i++) {
-            var pair = queryArray[i].split('=');
-            params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
-        }
-
-        return params;
-    }
-
-
     $(document).on('ready', function () {
         let el_notice_wrapper = $('.notice.notice-warning.iwp-hosting-mig-wrap'),
             el_connect_btn = el_notice_wrapper.find('.mig-button'),
-            el_transfer_btn = $('button.iwp-btn-transfer'),
             el_connect_guide = el_notice_wrapper.find('.mig-guide-text'),
-            query_params = get_query_params(),
             interval_id;
-
 
         if (el_notice_wrapper.hasClass('auto-activate-migration')) {
             el_connect_btn.addClass('loading').html('Connecting...');
