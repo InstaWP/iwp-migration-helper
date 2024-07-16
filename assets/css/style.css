@@ -81,7 +81,22 @@
     width: calc(100% - 80px);
     position: relative;
     display: inline-block;
+    overflow: hidden;
 }
+
+.iwp-auto-migration .iwp-reset {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #d63638;
+    color: #fff;
+    text-decoration: none;
+    padding: 5px 8px;
+    border-bottom-left-radius: 3px;
+    outline: none;
+    box-shadow: none;
+}
+
 
 .iwp-auto-migration h3.iwp-text-header {
     font-family: "Inter", sans-serif;

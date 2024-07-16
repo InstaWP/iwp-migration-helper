@@ -7,10 +7,11 @@ use InstaWP\Connect\Helpers\Curl;
 use InstaWP\Connect\Helpers\Helper;
 use InstaWP\Connect\Helpers\Option;
 
-$iwp_demo_site_id  = Option::get_option( 'iwp_demo_site_id', '' );
-$iwp_demo_site_url = Option::get_option( 'iwp_demo_site_url', '' );
+$iwp_demo_site_id    = Option::get_option( 'iwp_demo_site_id', '' );
+$iwp_demo_site_url   = Option::get_option( 'iwp_demo_site_url', '' );
+$iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
 
-if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) ) {
+if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_demo_created_at ) ) {
 
 	$demo_site_args     = [ 'email' => Option::get_option( 'admin_email' ) ];
 	$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, [], 'POST', 'v2', INSTAWP_API_KEY );
@@ -24,17 +25,21 @@ if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) ) {
 	$demo_site_args_res_data = Helper::get_args_option( 'data', $demo_site_args_res );
 	$iwp_demo_site_id        = Helper::get_args_option( 'site_id', $demo_site_args_res_data );
 	$iwp_demo_site_url       = Helper::get_args_option( 'site_url', $demo_site_args_res_data );
+	$iwp_demo_created_at     = Helper::get_args_option( 'created_at', $demo_site_args_res_data );
 
 	if ( ! empty( $iwp_demo_site_id ) && ! empty( $iwp_demo_site_url ) ) {
 		Option::update_option( 'iwp_demo_site_id', $iwp_demo_site_id );
 		Option::update_option( 'iwp_demo_site_url', $iwp_demo_site_url );
+		Option::update_option( 'iwp_demo_created_at', $iwp_demo_created_at );
 	}
 }
+
 
 ?>
 
 <div class="iwp-auto-migration">
-    <h3 class="iwp-text-header"><?php _e( 'We have detected a website <span>' . $iwp_demo_site_url . '</span> which you used to create a demo site.', 'iwp-hosting-migration' ); ?></h3>
+    <a href="<?php echo esc_url( iwp_current_admin_url( [ 'reset_auto_migration' => 'yes' ] ) ); ?>" class="iwp-reset"><?php esc_html_e( 'Reset', 'iwp-hosting-migration' ); ?></a>
+    <h3 class="iwp-text-header"><?php printf( __( 'We have detected a website <span>%s</span> which you used to create a demo site at %s.', 'iwp-hosting-migration' ), $iwp_demo_site_url, date( 'jS M Y, g:i a', intval( $iwp_demo_created_at ) ) ); ?></h3>
     <p class="iwp-text-content"><?php esc_attr_e( 'Transfer/Migrate the site here?', 'iwp-hosting-migration' ); ?></p>
     <button class="iwp-btn-transfer" type="button">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
