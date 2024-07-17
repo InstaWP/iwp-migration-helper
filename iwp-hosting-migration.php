@@ -24,6 +24,7 @@ defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', '4QnbUjY5pJ5JQxvbvD9n
 defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
 
+
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 	class IWP_HOSTING_MIG_Main {
 
@@ -44,14 +45,6 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
 			add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 			add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
-			add_action( 'admin_init', array( $this, 'reset_auto_migration_details' ) );
-		}
-
-		function reset_auto_migration_details() {
-			if ( current_user_can( 'manage_options' ) && isset( $_GET['reset_auto_migration'] ) && sanitize_text_field( $_GET['reset_auto_migration'] ) === 'yes' ) {
-				delete_option( 'iwp_demo_site_id' );
-				delete_option( 'iwp_demo_site_url' );
-			}
 		}
 
 		function instawp_connect_website() {

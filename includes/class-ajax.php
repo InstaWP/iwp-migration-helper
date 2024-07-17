@@ -18,6 +18,24 @@ class IWP_HOSTING_Ajax {
 		add_action( 'wp_ajax_iwp_set_api_key', array( $this, 'set_api_key' ) );
 		add_action( 'wp_ajax_iwp_connect_demo_site', array( $this, 'connect_demo_site' ) );
 		add_action( 'wp_ajax_iwp_initiate_migration', array( $this, 'initiate_migration' ) );
+		add_action( 'wp_ajax_iwp_reset_side_data', array( $this, 'reset_side_data' ) );
+	}
+
+	function reset_side_data() {
+
+		$reset_nonce = isset( $_POST['reset_nonce'] ) ? sanitize_text_field( $_POST['reset_nonce'] ) : '';
+
+		if ( ! wp_verify_nonce( $reset_nonce, 'iwp_reset_plugin' ) ) {
+			wp_send_json_error( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-hosting-migration' ) ] );
+		}
+
+		delete_option( 'iwp_demo_site_id' );
+		delete_option( 'iwp_demo_site_url' );
+		delete_option( 'iwp_demo_created_at' );
+
+		iwp_get_demo_site_data();
+
+		wp_send_json_success( [ 'message' => esc_html__( 'Deleted demo site data successfully.' ) ] );
 	}
 
 	function install_plugin() {

@@ -3,8 +3,6 @@
  * Auto migration prompt
  */
 
-use InstaWP\Connect\Helpers\Curl;
-use InstaWP\Connect\Helpers\Helper;
 use InstaWP\Connect\Helpers\Option;
 
 $iwp_demo_site_id    = Option::get_option( 'iwp_demo_site_id', '' );
@@ -12,35 +10,23 @@ $iwp_demo_site_url   = Option::get_option( 'iwp_demo_site_url', '' );
 $iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
 
 if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_demo_created_at ) ) {
+	iwp_get_demo_site_data();
 
-	$demo_site_args     = [ 'email' => Option::get_option( 'admin_email' ) ];
-	$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, [], 'POST', 'v2', INSTAWP_API_KEY );
-
-	if ( isset( $demo_site_args_res['success'] ) && $demo_site_args_res['success'] !== true ) {
-		error_log( 'Error from the api sites/get-demo-site: ' . Helper::get_args_option( 'message', $demo_site_args_res ) );
-
-		return;
-	}
-
-	$demo_site_args_res_data = Helper::get_args_option( 'data', $demo_site_args_res );
-	$iwp_demo_site_id        = Helper::get_args_option( 'site_id', $demo_site_args_res_data );
-	$iwp_demo_site_url       = Helper::get_args_option( 'site_url', $demo_site_args_res_data );
-	$iwp_demo_created_at     = Helper::get_args_option( 'created_at', $demo_site_args_res_data );
-
-	if ( ! empty( $iwp_demo_site_id ) && ! empty( $iwp_demo_site_url ) ) {
-		Option::update_option( 'iwp_demo_site_id', $iwp_demo_site_id );
-		Option::update_option( 'iwp_demo_site_url', $iwp_demo_site_url );
-		Option::update_option( 'iwp_demo_created_at', $iwp_demo_created_at );
-	}
+	$iwp_demo_site_id    = Option::get_option( 'iwp_demo_site_id', '' );
+	$iwp_demo_site_url   = Option::get_option( 'iwp_demo_site_url', '' );
+	$iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
 }
 
+$iwp_demo_created_at_str = date( 'jS M Y, g:i a', intval( $iwp_demo_created_at ) );
+$iwp_am_settings         = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) [];
+$iwp_text_heading        = str_replace( array( "{demo_site_url}", "{demo_created_at}" ), array( $iwp_demo_site_url, $iwp_demo_created_at_str ), $iwp_am_settings->text_heading ?? 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.' );
 
 ?>
 
 <div class="iwp-auto-migration">
-    <a href="<?php echo esc_url( iwp_current_admin_url( [ 'reset_auto_migration' => 'yes' ] ) ); ?>" class="iwp-reset"><?php esc_html_e( 'Reset', 'iwp-hosting-migration' ); ?></a>
-    <h3 class="iwp-text-header"><?php printf( __( 'We have detected a website <span>%s</span> which you used to create a demo site at %s.', 'iwp-hosting-migration' ), $iwp_demo_site_url, date( 'jS M Y, g:i a', intval( $iwp_demo_created_at ) ) ); ?></h3>
-    <p class="iwp-text-content"><?php esc_attr_e( 'Transfer/Migrate the site here?', 'iwp-hosting-migration' ); ?></p>
+    <span class="iwp-reset" data-reset-nonce="<?php echo wp_create_nonce( 'iwp_reset_plugin' ); ?>"><?php esc_html_e( 'Reset', 'iwp-hosting-migration' ); ?></span>
+	<?php printf( '<h3 class="iwp-text-header">%s</h3>', $iwp_text_heading ); ?>
+	<?php printf( '<p class="iwp-text-content">%s</p>', $iwp_am_settings->text_desc ?? 'Transfer or Migrate the site here?' ); ?>
     <button class="iwp-btn-transfer" type="button">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1.33301 1.33398V5.50065H1.81761M14.6148 7.16732C14.2047 3.87872 11.3994 1.33398 7.99967 1.33398C5.20186 1.33398 2.80658 3.05746 1.81761 5.50065M1.81761 5.50065H5.49967M14.6663 14.6673V10.5007H14.1817M14.1817 10.5007C13.1928 12.9438 10.7975 14.6673 7.99967 14.6673C4.59999 14.6673 1.79467 12.1226 1.38459 8.83398M14.1817 10.5007H10.4997" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -180,3 +166,16 @@ if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_de
         </defs>
     </svg>
 </div>
+
+<style>
+    .iwp-auto-migration .iwp-btn-transfer {
+    <?php echo esc_attr( $iwp_am_settings->transfer_btn_style ?? '' ); ?>
+    }
+
+    .iwp-auto-migration .iwp-btn-transfer:hover {
+    <?php echo esc_attr( $iwp_am_settings->transfer_btn_style_hover ?? '' ); ?>
+    }
+
+    <?php echo $iwp_am_settings->custom_css ?? ''; ?>
+
+</style>

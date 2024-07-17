@@ -75,6 +75,33 @@
         }
     });
 
+    $(document).on('click', 'span.iwp-reset', function () {
+
+        let el_reset_btn = $(this);
+
+        if (el_reset_btn.hasClass('loading')) {
+            return;
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: plugin_object.ajax_url,
+            context: this,
+            beforeSend: function () {
+                el_reset_btn.addClass('loading');
+            },
+            data: {
+                'action': 'iwp_reset_side_data',
+                'reset_nonce': el_reset_btn.data('reset-nonce'),
+            },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                }
+            }
+        });
+    });
+
     $(document).on('click', 'button.iwp-btn-transfer', function () {
 
         let el_transfer_btn = $(this),

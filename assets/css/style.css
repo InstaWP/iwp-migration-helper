@@ -95,8 +95,28 @@
     border-bottom-left-radius: 3px;
     outline: none;
     box-shadow: none;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
+.iwp-auto-migration .iwp-reset.loading {
+    padding-left: 30px;
+}
+
+.iwp-auto-migration .iwp-reset.loading:after {
+    content: ' ';
+    position: absolute;
+    height: 10px;
+    width: 10px;
+    top: 50%;
+    left: 15px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 3px solid rgb(255 255 255 / 20%);
+    border-right-color: #fff;
+    animation: loading 1s linear infinite;
+    margin: -8px -8px;
+}
 
 .iwp-auto-migration h3.iwp-text-header {
     font-family: "Inter", sans-serif;
@@ -140,8 +160,8 @@
 }
 
 .iwp-auto-migration .iwp-btn-transfer:hover {
-    background: #08a571;
-    border-color: #08a571;
+    background: #14855f;
+    border-color: #14855f;
 }
 
 .iwp-auto-migration .iwp-info-shape {
