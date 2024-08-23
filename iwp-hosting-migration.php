@@ -20,7 +20,7 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.0.3' );
 
-defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', '4QnbUjY5pJ5JQxvbvD9nkvw5wp1KWDlNdK5ouY8L' );
+defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'Ho2AGTEOz6BDSAv0HBnUhZmEq1fPO3ewNI268qC9' );
 defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
 
@@ -259,10 +259,10 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-ajax.php';
 IWP_HOSTING_MIG_Main::instance();
 
 
-add_action( 'wp_head', function () {
-	if ( isset( $_GET['debug'] ) ) {
-
-		die();
-	}
-}, 0 );
+//add_action( 'wp_head', function () {
+//	if ( isset( $_GET['debug'] ) ) {
+//
+//		die();
+//	}
+//}, 0 );
 

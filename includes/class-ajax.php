@@ -114,7 +114,7 @@ class IWP_HOSTING_Ajax {
 			wp_send_json_error( [ 'message' => esc_html__( 'Could not find demo site details.' ) ] );
 		}
 
-		global $wp_version;
+		global $wp_version, $current_user;
 
 		// Create InstaWP backup directory
 		InstaWP_Tools::create_instawpbackups_dir();
@@ -122,10 +122,24 @@ class IWP_HOSTING_Ajax {
 		// Clean InstaWP backup directory
 		InstaWP_Tools::clean_instawpbackups_dir();
 
-		$migrate_key        = Helper::get_random_string( 40 );
-		$migrate_settings   = InstaWP_Tools::get_migrate_settings();
+		$migrate_key       = Helper::get_random_string( 40 );
+		$current_user_data = (array) $current_user->data;
+
+		if ( isset( $current_user_data['user_pass'] ) ) {
+			$current_user_data['user_pass'] = base64_encode( $current_user_data['user_pass'] );
+		}
+
+		$extra_settings     = array(
+			'retain_user'  => true,
+			'user_details' => array(
+				'data'  => $current_user_data,
+				'caps'  => $current_user->caps,
+				'roles' => $current_user->roles
+			),
+		);
+		$migrate_settings   = InstaWP_Tools::get_migrate_settings( array(), $extra_settings );
 		$api_signature      = hash( 'sha512', $migrate_key . wp_generate_uuid4() );
-		$dest_file_url      = InstaWP_Tools::generate_destination_file( $migrate_key, $api_signature );
+		$dest_file_url      = InstaWP_Tools::generate_destination_file( $migrate_key, $api_signature, $migrate_settings );
 		$initiate_push_args = [
 			'source_connect_id'  => $iwp_demo_site_connect_id,
 			'php_version'        => PHP_VERSION,
