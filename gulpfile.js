@@ -145,4 +145,5 @@ function create_zip() {
         .pipe(gulp.dest('../'))
 }
 
-exports.default = series(updateFile, clean_files, create_pot, create_zip, revertReplacements);
+// exports.default = series(updateFile, clean_files, create_pot, create_zip, revertReplacements);
+exports.default = series(clean_files, create_pot, create_zip);

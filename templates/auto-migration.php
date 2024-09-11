@@ -18,13 +18,17 @@ if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_de
 	$iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
 }
 
-$iwp_demo_created_at_str = date( 'jS M Y, g:i a', intval( $iwp_demo_created_at ) );
-$iwp_am_settings         = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) [];
-
 if ( ! empty( $iwp_demo_site_url ) ) {
-	$iwp_text_heading     = isset( $iwp_am_settings->text_heading ) ? __( $iwp_am_settings->text_heading, 'iwp-hosting-migration' ) : __( 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.', 'iwp-hosting-migration' );
-	$iwp_text_heading     = str_replace( array( "{demo_site_url}", "{demo_created_at}" ), array( $iwp_demo_site_url, $iwp_demo_created_at_str ), $iwp_text_heading );
-	$iwp_text_description = $iwp_am_settings->text_desc ?? esc_html__( 'Transfer or Migrate the site here.', 'iwp-hosting-migration' );
+
+	$date = new DateTime();
+	$date->setTimestamp( intval( $iwp_demo_created_at ) );
+	$date->setTimezone( wp_timezone() );
+
+	$iwp_demo_created_at_str = $date->format( 'jS M Y, g:i a' );
+	$iwp_am_settings         = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) [];
+	$iwp_text_heading        = isset( $iwp_am_settings->text_heading ) ? __( $iwp_am_settings->text_heading, 'iwp-hosting-migration' ) : __( 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.', 'iwp-hosting-migration' );
+	$iwp_text_heading        = str_replace( array( "{demo_site_url}", "{demo_created_at}" ), array( $iwp_demo_site_url, $iwp_demo_created_at_str ), $iwp_text_heading );
+	$iwp_text_description    = $iwp_am_settings->text_desc ?? esc_html__( 'Transfer or Migrate the site here.', 'iwp-hosting-migration' );
 } else {
 	$iwp_text_heading     = esc_html__( 'We could not found any website to migration!', 'iwp-hosting-migration' );
 	$iwp_text_description = esc_html__( 'Please try again with the reset button.', 'iwp-hosting-migration' );

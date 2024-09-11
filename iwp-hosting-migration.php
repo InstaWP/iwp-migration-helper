@@ -172,7 +172,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		}
 
 		function load_text_domain() {
-			load_plugin_textdomain( 'iwp-hosting-mig', false, plugin_basename( dirname( __FILE__ ) ) . '/languages/' );
+			load_plugin_textdomain( 'iwp-hosting-mig', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		}
 
 		function admin_scripts() {
@@ -203,7 +203,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		}
 
 		private function set_locale() {
-			load_plugin_textdomain( 'iwp-hosting-migration', false, dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/' );
+			load_plugin_textdomain( 'iwp-hosting-migration', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		}
 	}
 }
