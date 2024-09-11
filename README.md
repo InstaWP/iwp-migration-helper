@@ -38,6 +38,11 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
+#### 1.0.4 - 11 September 2024
+
+- NEW - Added translation support.
+- FIX - Fixed timezone issue for the demo site creation.
+- 
 #### 1.0.3 - 17 July 2024
 
 - NEW - Added reset demo site details button.
