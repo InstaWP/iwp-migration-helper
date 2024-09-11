@@ -82,6 +82,11 @@
     position: relative;
     display: inline-block;
     overflow: hidden;
+    border: 1px solid #11bf855e;
+}
+
+.iwp-auto-migration.no-website-found {
+    border-color: #d6363854;
 }
 
 .iwp-auto-migration .iwp-reset {
@@ -97,6 +102,7 @@
     box-shadow: none;
     cursor: pointer;
     transition: 0.3s;
+    z-index: 9999;
 }
 
 .iwp-auto-migration .iwp-reset.loading {
@@ -168,7 +174,7 @@
     position: absolute;
     bottom: 0;
     right: 0;
-    z-index: 999;
+    z-index: 9;
 }
 
 

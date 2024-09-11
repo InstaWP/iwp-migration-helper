@@ -20,7 +20,7 @@ defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL',
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.0.3' );
 
-defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'Ho2AGTEOz6BDSAv0HBnUhZmEq1fPO3ewNI268qC9' );
+//defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'Ho2AGTEOz6BDSAv0HBnUhZmEq1fPO3ewNI268qC9' );
 defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
 
@@ -35,6 +35,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		private $redirect_url;
 
 		function __construct() {
+
+			if ( is_admin() ) {
+				$this->set_locale();
+			}
 
 			Helper::set_api_domain( INSTAWP_API_DOMAIN );
 
@@ -67,7 +71,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 				wp_send_json_success(
 					array(
-						'message'  => esc_html__( 'Plugin activated successfully.' ),
+						'message'  => __( 'Plugin activated successfully.', 'iwp-hosting-migration' ),
 						'response' => $response
 					)
 				);
@@ -81,7 +85,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				if ( ! $connect_response ) {
 					wp_send_json_error(
 						array(
-							'message'  => esc_html__( 'Website could not connect successfully.' ),
+							'message'  => __( 'Website could not connect successfully.', 'iwp-hosting-migration' ),
 							'response' => $connect_response
 						)
 					);
@@ -89,7 +93,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 				wp_send_json_success(
 					array(
-						'message'  => esc_html__( 'Website connected successfully.' ),
+						'message'  => __( 'Website connected successfully.', 'iwp-hosting-migration' ),
 						'response' => $connect_response
 					)
 				);
@@ -104,7 +108,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 				wp_send_json_success(
 					array(
-						'message'      => esc_html__( 'Ready to start migration.' ),
+						'message'      => __( 'Ready to start migration.', 'iwp-hosting-migration' ),
 						'response'     => true,
 						'redirect_url' => $this->redirect_url,
 					)
@@ -113,7 +117,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			wp_send_json_error(
 				array(
-					'message'  => esc_html__( 'Migration might be finished.' ),
+					'message'  => __( 'Migration might be finished.', 'iwp-hosting-migration' ),
 					'response' => false
 				)
 			);
@@ -129,7 +133,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			}
 
 			$auto_activate_mig = defined( 'INSTAWP_AUTO_ACTIVATE_MIGRATION' ) && INSTAWP_AUTO_ACTIVATE_MIGRATION;
-			$btn_label         = esc_html__( 'Connect' );
+			$btn_label         = __( 'Connect', 'iwp-hosting-migration' );
 			$redirect_url      = '';
 			$classes           = array(
 				'notice',
@@ -138,14 +142,14 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			);
 
 			if ( ! empty( Helper::get_connect_id() ) ) {
-				$guide_message = esc_html__( 'Website is connected.' );
-				$btn_label     = esc_html__( 'Start Migration' );
+				$guide_message = __( 'Website is connected.', 'iwp-hosting-migration' );
+				$btn_label     = __( 'Start Migration', 'iwp-hosting-migration' );
 				$classes[]     = 'connected';
 				$redirect_url  = $this->redirect_url;
 			} elseif ( ! function_exists( 'instawp' ) ) {
-				$guide_message = esc_html__( 'InstaWP Connect plugin not found.' );
+				$guide_message = __( 'InstaWP Connect plugin not found.', 'iwp-hosting-migration' );
 			} else {
-				$guide_message = esc_html__( 'Website is not connected.' );
+				$guide_message = __( 'Website is not connected.', 'iwp-hosting-migration' );
 			}
 
 			if ( $auto_activate_mig ) {
@@ -155,9 +159,9 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			echo '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">';
 
 			if ( $auto_activate_mig ) {
-				echo '<p>' . esc_html__( 'You are being redirected to the site migrator tool..' ) . '</p>';
+				echo '<p>' . __( 'You are being redirected to the site migrator tool..', 'iwp-hosting-migration' ) . '</p>';
 			} else {
-				echo '<p>' . esc_html__( 'Your website will be connected with InstaWP and then you can initiate the migration from other website to this website.' ) . '</p>';
+				echo '<p>' . __( 'Your website will be connected with InstaWP and then you can initiate the migration from other website to this website.', 'iwp-hosting-migration' ) . '</p>';
 			}
 
 			echo '<div class="mig-button-wrap">';
@@ -175,8 +179,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			$localize_scripts = array(
 				'ajax_url'          => admin_url( 'admin-ajax.php' ),
-				'copy_text'         => esc_html__( 'Copied.', 'iwp-hosting-mig' ),
-				'text_transferring' => esc_html__( 'Transferring...', 'iwp-hosting-mig' ),
+				'copy_text'         => __( 'Copied.', 'iwp-hosting-migration' ),
+				'text_transferring' => __( 'Transferring...', 'iwp-hosting-migration' ),
 			);
 
 			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
@@ -190,64 +194,16 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			wp_enqueue_style( 'iwp-hosting-mig', IWP_HOSTING_MIG_PLUGIN_URL . 'assets/css/style.css', [], self::$_script_version );
 		}
 
-		private function set_api_data( $key, $value ) {
-
-			$api_options = get_option( 'instawp_api_options', array() );
-
-			if ( ! is_array( $api_options ) || empty( $api_options ) ) {
-				$api_options = [];
-			}
-
-			$api_options[ $key ] = $value;
-
-			return update_option( 'instawp_api_options', $api_options );
-		}
-
-		private function get_api_data( $key = 'api_key' ) {
-
-			$api_options = get_option( 'instawp_api_options', array() );
-			$value       = '';
-
-			if ( ( ! is_array( $api_options ) || empty( $api_options ) ) && $key != 'api_key' && $key != 'api_url' ) {
-				return $value;
-			}
-
-			if ( isset( $api_options[ $key ] ) ) {
-				$value = $api_options[ $key ];
-			}
-
-			// Check api_key && ENV
-			if ( $key == 'api_key' && empty( $value ) ) {
-				$env_file = ABSPATH . '.env';
-
-				if ( file_exists( $env_file ) && is_readable( $env_file ) ) {
-					$env_data = parse_ini_file( ABSPATH . '.env' );
-					$value    = isset( $env_data['INSTAWP_API_KEY'] ) ? sanitize_text_field( $env_data['INSTAWP_API_KEY'] ) : $value;
-				}
-			}
-
-			// Check api_key && constant
-			if ( $key == 'api_key' && empty( $value ) ) {
-				$value = defined( 'INSTAWP_API_KEY' ) ? INSTAWP_API_KEY : $value;
-			}
-
-			// Check api_url && constant
-			if ( $key == 'api_url' ) {
-				$value = defined( 'INSTAWP_ENVIRONMENT' ) ? 'https://' . INSTAWP_ENVIRONMENT . '.instawp.io' : $value;
-				$value = empty( $value ) ? 'https://app.instawp.io' : $value;
-
-				$this->set_api_data( 'api_url', $value );
-			}
-
-			return $value;
-		}
-
 		public static function instance() {
 			if ( is_null( self::$_instance ) ) {
 				self::$_instance = new self();
 			}
 
 			return self::$_instance;
+		}
+
+		private function set_locale() {
+			load_plugin_textdomain( 'iwp-hosting-migration', false, dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/' );
 		}
 	}
 }
@@ -257,12 +213,3 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-ajax.php';
 
 IWP_HOSTING_MIG_Main::instance();
-
-
-//add_action( 'wp_head', function () {
-//	if ( isset( $_GET['debug'] ) ) {
-//
-//		die();
-//	}
-//}, 0 );
-

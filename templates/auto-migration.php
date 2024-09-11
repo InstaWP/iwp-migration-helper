@@ -8,6 +8,7 @@ use InstaWP\Connect\Helpers\Option;
 $iwp_demo_site_id    = Option::get_option( 'iwp_demo_site_id', '' );
 $iwp_demo_site_url   = Option::get_option( 'iwp_demo_site_url', '' );
 $iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
+$wrapper_classes     = array( 'iwp-auto-migration' );
 
 if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_demo_created_at ) ) {
 	iwp_get_demo_site_data();
@@ -19,20 +20,35 @@ if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_de
 
 $iwp_demo_created_at_str = date( 'jS M Y, g:i a', intval( $iwp_demo_created_at ) );
 $iwp_am_settings         = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) [];
-$iwp_text_heading        = str_replace( array( "{demo_site_url}", "{demo_created_at}" ), array( $iwp_demo_site_url, $iwp_demo_created_at_str ), $iwp_am_settings->text_heading ?? 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.' );
+
+if ( ! empty( $iwp_demo_site_url ) ) {
+	$iwp_text_heading     = isset( $iwp_am_settings->text_heading ) ? __( $iwp_am_settings->text_heading, 'iwp-hosting-migration' ) : __( 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.', 'iwp-hosting-migration' );
+	$iwp_text_heading     = str_replace( array( "{demo_site_url}", "{demo_created_at}" ), array( $iwp_demo_site_url, $iwp_demo_created_at_str ), $iwp_text_heading );
+	$iwp_text_description = $iwp_am_settings->text_desc ?? esc_html__( 'Transfer or Migrate the site here.', 'iwp-hosting-migration' );
+} else {
+	$iwp_text_heading     = esc_html__( 'We could not found any website to migration!', 'iwp-hosting-migration' );
+	$iwp_text_description = esc_html__( 'Please try again with the reset button.', 'iwp-hosting-migration' );
+	$wrapper_classes[]    = 'no-website-found';
+}
 
 ?>
 
-<div class="iwp-auto-migration">
+<div class="<?php echo esc_attr( implode( ' ', $wrapper_classes ) ); ?>">
     <span class="iwp-reset" data-reset-nonce="<?php echo wp_create_nonce( 'iwp_reset_plugin' ); ?>"><?php esc_html_e( 'Reset', 'iwp-hosting-migration' ); ?></span>
+
 	<?php printf( '<h3 class="iwp-text-header">%s</h3>', $iwp_text_heading ); ?>
-	<?php printf( '<p class="iwp-text-content">%s</p>', $iwp_am_settings->text_desc ?? 'Transfer or Migrate the site here?' ); ?>
-    <button class="iwp-btn-transfer" type="button">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1.33301 1.33398V5.50065H1.81761M14.6148 7.16732C14.2047 3.87872 11.3994 1.33398 7.99967 1.33398C5.20186 1.33398 2.80658 3.05746 1.81761 5.50065M1.81761 5.50065H5.49967M14.6663 14.6673V10.5007H14.1817M14.1817 10.5007C13.1928 12.9438 10.7975 14.6673 7.99967 14.6673C4.59999 14.6673 1.79467 12.1226 1.38459 8.83398M14.1817 10.5007H10.4997" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span><?php esc_attr_e( 'Transfer Site', 'iwp-hosting-migration' ); ?></span>
-    </button>
+
+	<?php printf( '<p class="iwp-text-content">%s</p>', $iwp_text_description ); ?>
+
+	<?php if ( ! empty( $iwp_demo_site_url ) ) : ?>
+        <button class="iwp-btn-transfer" type="button">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1.33301 1.33398V5.50065H1.81761M14.6148 7.16732C14.2047 3.87872 11.3994 1.33398 7.99967 1.33398C5.20186 1.33398 2.80658 3.05746 1.81761 5.50065M1.81761 5.50065H5.49967M14.6663 14.6673V10.5007H14.1817M14.1817 10.5007C13.1928 12.9438 10.7975 14.6673 7.99967 14.6673C4.59999 14.6673 1.79467 12.1226 1.38459 8.83398M14.1817 10.5007H10.4997" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span><?php esc_attr_e( 'Transfer Site', 'iwp-hosting-migration' ); ?></span>
+        </button>
+	<?php endif; ?>
+
     <svg class="iwp-info-shape" width="135" height="157" viewBox="0 0 135 157" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clip-path="url(#clip0_30752_25277)">
             <g opacity="0.2" filter="url(#filter0_f_30752_25277)">
@@ -177,5 +193,4 @@ $iwp_text_heading        = str_replace( array( "{demo_site_url}", "{demo_created
     }
 
     <?php echo $iwp_am_settings->custom_css ?? ''; ?>
-
 </style>
