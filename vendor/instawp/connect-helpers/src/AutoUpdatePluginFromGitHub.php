@@ -56,7 +56,7 @@ class AutoUpdatePluginFromGitHub {
 	 *
 	 * @var int
 	 */
-	private $last_update_check_key = 'iwp_last_plugin_update_check';
+	private $last_update_check_key = 'iwp_last_update_check';
 
 	/**
 	 * Initialize a new instance of the WordPress Auto-Update class
@@ -78,6 +78,8 @@ class AutoUpdatePluginFromGitHub {
 		// Set the plugin directory.
 		$this->plugin_directory = $plugin_slug[0];
 
+		// Add plugin slug in update check key
+		$this->last_update_check_key = $this->last_update_check_key . '_' . sanitize_key( $this->slug );
 		// Hooks for the plugin update.
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
 		// Hook for the auto update.
