@@ -49,6 +49,29 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
 			add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 			add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
+
+			$this->check_update();
+		}
+
+		/**
+		 * Checks for any available updates for the plugin.
+		 *
+		 * This function is intended to verify and handle any necessary updates
+		 * for the plugin.
+		 * 
+		 * @since 1.0.5
+		 * @return void
+		 */
+		function check_update() {
+			if ( class_exists( 'InstaWP\Connect\Helpers\AutoUpdatePluginFromGitHub' ) ) {
+				$updater = new InstaWP\Connect\Helpers\AutoUpdatePluginFromGitHub(
+					IWP_HOSTING_MIG_PLUGIN_VERSION, // Current version
+					'https://github.com/InstaWP/iwp-hosting-migration', // URL to GitHub repo
+					plugin_basename( __FILE__ ) // Plugin slug
+				);
+			} else {
+				error_log( 'Update check class not found.' );
+			}
 		}
 
 		function instawp_connect_website() {
