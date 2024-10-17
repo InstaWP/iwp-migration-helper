@@ -73,24 +73,30 @@ class AutoUpdatePluginFromGitHub {
 
 		// Explode the plugin slug.
 		$plugin_slug = explode( '/', $plugin_slug );
-		// Set the plugin slug.
-		$this->slug = str_replace( '.php', '', $plugin_slug[1] );
-		// Set the plugin directory.
-		$this->plugin_directory = $plugin_slug[0];
+		
+		if ( 2 === count( $plugin_slug ) ) {
+			// Set the plugin slug.
+			$this->slug = str_replace( '.php', '', $plugin_slug[1] );
+			// Set the plugin directory.
+			$this->plugin_directory = $plugin_slug[0];
 
-		// Add plugin slug in update check key
-		$this->last_update_check_key = $this->last_update_check_key . '_' . sanitize_key( $this->slug );
-		// Hooks for the plugin update.
-		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
-		// Hook for the auto update.
-		add_filter( 'auto_update_plugin', array( $this, 'auto_update_specific_plugin' ), 10, 2 );
-		// Hook for the force update check.
-		add_action( 'admin_init', array( $this, 'force_update_check' ) );
-		// Hook for the after install.
-		add_filter( 'upgrader_post_install', array( $this, 'after_install' ), 10, 3 );
+			if ( $this->slug === $this->plugin_directory ) {
+				// Add plugin slug in update check key
+				$this->last_update_check_key = $this->last_update_check_key . '_' . sanitize_key( $this->slug );
+				// Hooks for the plugin update.
+				add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
+				// Hook for the auto update.
+				add_filter( 'auto_update_plugin', array( $this, 'auto_update_specific_plugin' ), 10, 2 );
+				// Hook for the force update check.
+				add_action( 'admin_init', array( $this, 'force_update_check' ) );
+				// Hook for the after install.
+				add_filter( 'upgrader_post_install', array( $this, 'after_install' ), 10, 3 );
 
-		// Hook for the install package result.
-		add_filter( 'upgrader_install_package_result', array( $this, 'install_package_result' ), 10, 2 );
+				// Hook for the install package result.
+				add_filter( 'upgrader_install_package_result', array( $this, 'install_package_result' ), 10, 2 );
+			}
+		}
+		
 	}
 
 	/**
