@@ -38,6 +38,11 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
+
+#### 1.0.5 - 
+
+- New - The system now automatically checks for updates.
+
 #### 1.0.4 - 11 September 2024
 
 - NEW - Added translation support.
