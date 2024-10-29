@@ -1,3 +1,5 @@
+# InstaWP Migration Helper
+
 This plugin is aimed to be a companion plugin which acts as a bridge b/w Destination WP site (where the plugin is supposed to be installed) and IntaWP Migration service.
 
 You can take the entire code and adopt it in your plugin, if you wish you.
@@ -39,15 +41,15 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 ## Changelog
 
 
-#### 1.0.5 - 
+#### 1.0.5 - 29 October 2024
 
-- New - The system now automatically checks for updates.
+- NEW - The system now automatically checks for updates.
 
 #### 1.0.4 - 11 September 2024
 
 - NEW - Added translation support.
 - FIX - Fixed timezone issue for the demo site creation.
-- 
+
 #### 1.0.3 - 17 July 2024
 
 - NEW - Added reset demo site details button.

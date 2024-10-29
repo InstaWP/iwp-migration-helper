@@ -37,6 +37,11 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 	 * @return bool
 	 */
 	function iwp_get_demo_site_data() {
+
+		if ( ! defined( 'INSTAWP_API_KEY' ) ) {
+			return false;
+		}
+
 		$demo_site_args     = [ 'email' => Option::get_option( 'admin_email' ) ];
 		$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, [], 'POST', 'v2', INSTAWP_API_KEY );
 
