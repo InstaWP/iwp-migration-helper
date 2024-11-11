@@ -40,6 +40,9 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
+#### 1.0.5 - 11 Nov 2024
+(no need for version bump)
+- Added a sample plugin for migration settings which can be independently installed while the main plugin keeps updating.
 
 #### 1.0.5 - 29 October 2024
 
