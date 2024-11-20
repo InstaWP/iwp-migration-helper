@@ -3,7 +3,7 @@
 	Plugin Name: InstaWP Migration Helper
 	Plugin URI: https://instawp.com/hosting-migration/
 	Description: Migration helper plugin for hosting providers.
-	Version: 1.0.5
+	Version: 1.0.6
 	Text Domain: iwp-hosting-migration
 	Author: InstaWP Team
 	Author URI: https://instawp.com/
@@ -18,11 +18,7 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.0.4' );
-
-//defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', 'Ho2AGTEOz6BDSAv0HBnUhZmEq1fPO3ewNI268qC9' );
-defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
-defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.0.6' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
