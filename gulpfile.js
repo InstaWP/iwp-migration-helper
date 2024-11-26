@@ -46,7 +46,7 @@ function updateFile(cb) {
                 constant_val = 'https://' + content + '.instawp.io';
             }
 
-            gulp.src('iwp-hosting-migration.php')
+            gulp.src('iwp-migration-helper.php')
                 .pipe(replace(new RegExp(`define\\(\\s*'${constant_key}'\\s*,\\s*'[^']*'\\s*\\)`, 'g'), `define( '${constant_key}', '${constant_val}' )`))
                 .pipe(gulp.dest('./'))
                 .on('end', function () {
@@ -71,7 +71,7 @@ function revertReplacements(cb) {
         let originalValue = originalValues[key];
         promises.push(
             new Promise((resolve, reject) => {
-                gulp.src('iwp-hosting-migration.php')
+                gulp.src('iwp-migration-helper.php')
                     .pipe(replace(new RegExp(`define\\(\\s*'${key}'\\s*,\\s*'[^']*'\\s*\\)`), `define( '${key}', '${originalValue}' )`))
                     .pipe(gulp.dest('./'))
                     .on('end', resolve)
@@ -124,24 +124,24 @@ var zipPath = [
 var potPath = ['./*.php', 'includes/*.php', 'templates/*.php'];
 
 function clean_files() {
-    let cleanPath = ['../iwp-hosting-migration.zip'];
+    let cleanPath = ['../iwp-migration-helper.zip'];
     return del(cleanPath, {force: true});
 }
 
 function create_pot() {
     return gulp.src(potPath)
         .pipe(wpPot({
-            domain: 'iwp-hosting-migration',
+            domain: 'iwp-migration-helper',
             package: 'InstaWP Hosting Migration',
             copyrightText: 'InstaWP',
             ignoreTemplateNameHeader: true
         }))
-        .pipe(gulp.dest('languages/iwp-hosting-migration.pot'));
+        .pipe(gulp.dest('languages/iwp-migration-helper.pot'));
 }
 
 function create_zip() {
     return gulp.src(zipPath, {base: '../'})
-        .pipe(zip('iwp-hosting-migration.zip'))
+        .pipe(zip('iwp-migration-helper.zip'))
         .pipe(gulp.dest('../'))
 }
 

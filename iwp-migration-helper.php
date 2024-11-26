@@ -4,7 +4,7 @@
 	Plugin URI: https://instawp.com/hosting-migration/
 	Description: Migration helper plugin for hosting providers.
 	Version: 1.0.6
-	Text Domain: iwp-hosting-migration
+	Text Domain: iwp-migration-helper
 	Author: InstaWP Team
 	Author URI: https://instawp.com/
 	License: GPLv2 or later
@@ -85,9 +85,9 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			printf( 
 				'<div class="%1$s"><p>%2$s <strong>%3$s</strong> %4$s</p></div>', 
 				'notice notice-warning is-dismissible', 
-				__( 'Missing IWP migration settings. Please check', 'iwp-hosting-migration'),
+				__( 'Missing IWP migration settings. Please check', 'iwp-migration-helper'),
 				'IWP Migration Helper Settings',
-				__( 'plugin is installed, activated and configured properly.', 'iwp-hosting-migration'),
+				__( 'plugin is installed, activated and configured properly.', 'iwp-migration-helper'),
 			);
 		}
 
@@ -104,7 +104,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			if ( class_exists( 'InstaWP\Connect\Helpers\AutoUpdatePluginFromGitHub' ) ) {
 				$updater = new InstaWP\Connect\Helpers\AutoUpdatePluginFromGitHub(
 					IWP_HOSTING_MIG_PLUGIN_VERSION, // Current version
-					'https://github.com/InstaWP/iwp-hosting-migration', // URL to GitHub repo
+					'https://github.com/InstaWP/iwp-migration-helper', // URL to GitHub repo
 					plugin_basename( __FILE__ ) // Plugin slug
 				);
 			} else {
@@ -132,7 +132,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 				wp_send_json_success(
 					array(
-						'message'  => __( 'Plugin activated successfully.', 'iwp-hosting-migration' ),
+						'message'  => __( 'Plugin activated successfully.', 'iwp-migration-helper' ),
 						'response' => $response
 					)
 				);
@@ -146,7 +146,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				if ( ! $connect_response ) {
 					wp_send_json_error(
 						array(
-							'message'  => __( 'Website could not connect successfully.', 'iwp-hosting-migration' ),
+							'message'  => __( 'Website could not connect successfully.', 'iwp-migration-helper' ),
 							'response' => $connect_response
 						)
 					);
@@ -154,7 +154,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 				wp_send_json_success(
 					array(
-						'message'  => __( 'Website connected successfully.', 'iwp-hosting-migration' ),
+						'message'  => __( 'Website connected successfully.', 'iwp-migration-helper' ),
 						'response' => $connect_response
 					)
 				);
@@ -169,7 +169,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 				wp_send_json_success(
 					array(
-						'message'      => __( 'Ready to start migration.', 'iwp-hosting-migration' ),
+						'message'      => __( 'Ready to start migration.', 'iwp-migration-helper' ),
 						'response'     => true,
 						'redirect_url' => $this->redirect_url,
 					)
@@ -178,7 +178,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			wp_send_json_error(
 				array(
-					'message'  => __( 'Migration might be finished.', 'iwp-hosting-migration' ),
+					'message'  => __( 'Migration might be finished.', 'iwp-migration-helper' ),
 					'response' => false
 				)
 			);
@@ -194,7 +194,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			}
 
 			$auto_activate_mig = defined( 'INSTAWP_AUTO_ACTIVATE_MIGRATION' ) && INSTAWP_AUTO_ACTIVATE_MIGRATION;
-			$btn_label         = __( 'Connect', 'iwp-hosting-migration' );
+			$btn_label         = __( 'Connect', 'iwp-migration-helper' );
 			$redirect_url      = '';
 			$classes           = array(
 				'notice',
@@ -203,14 +203,14 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			);
 
 			if ( ! empty( Helper::get_connect_id() ) ) {
-				$guide_message = __( 'Website is connected.', 'iwp-hosting-migration' );
-				$btn_label     = __( 'Start Migration', 'iwp-hosting-migration' );
+				$guide_message = __( 'Website is connected.', 'iwp-migration-helper' );
+				$btn_label     = __( 'Start Migration', 'iwp-migration-helper' );
 				$classes[]     = 'connected';
 				$redirect_url  = $this->redirect_url;
 			} elseif ( ! function_exists( 'instawp' ) ) {
-				$guide_message = __( 'InstaWP Connect plugin not found.', 'iwp-hosting-migration' );
+				$guide_message = __( 'InstaWP Connect plugin not found.', 'iwp-migration-helper' );
 			} else {
-				$guide_message = __( 'Website is not connected.', 'iwp-hosting-migration' );
+				$guide_message = __( 'Website is not connected.', 'iwp-migration-helper' );
 			}
 
 			if ( $auto_activate_mig ) {
@@ -220,9 +220,9 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			echo '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">';
 
 			if ( $auto_activate_mig ) {
-				echo '<p>' . __( 'You are being redirected to the site migrator tool..', 'iwp-hosting-migration' ) . '</p>';
+				echo '<p>' . __( 'You are being redirected to the site migrator tool..', 'iwp-migration-helper' ) . '</p>';
 			} else {
-				echo '<p>' . __( 'Your website will be connected with InstaWP and then you can initiate the migration from other website to this website.', 'iwp-hosting-migration' ) . '</p>';
+				echo '<p>' . __( 'Your website will be connected with InstaWP and then you can initiate the migration from other website to this website.', 'iwp-migration-helper' ) . '</p>';
 			}
 
 			echo '<div class="mig-button-wrap">';
@@ -240,8 +240,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			$localize_scripts = array(
 				'ajax_url'          => admin_url( 'admin-ajax.php' ),
-				'copy_text'         => __( 'Copied.', 'iwp-hosting-migration' ),
-				'text_transferring' => __( 'Transferring...', 'iwp-hosting-migration' ),
+				'copy_text'         => __( 'Copied.', 'iwp-migration-helper' ),
+				'text_transferring' => __( 'Transferring...', 'iwp-migration-helper' ),
 			);
 
 			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
@@ -264,7 +264,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		}
 
 		private function set_locale() {
-			load_plugin_textdomain( 'iwp-hosting-migration', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+			load_plugin_textdomain( 'iwp-migration-helper', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		}
 	}
 }

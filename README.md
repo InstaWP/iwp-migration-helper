@@ -6,7 +6,7 @@ You can take the entire code and adopt it in your plugin, if you wish you.
 
 ## Configuration
 
-You need to set these values in `iwp-hosting-migration.php` file:
+You need to set these values in `iwp-migration-helper.php` file:
 
 1. API Key can be generated from API Token page here - https://app.instawp.io/user/api-tokens, use the read-only + read-write key.
 2. API Domain should be https://app.instawp.io

@@ -26,7 +26,7 @@ class IWP_HOSTING_Ajax {
 		$reset_nonce = isset( $_POST['reset_nonce'] ) ? sanitize_text_field( $_POST['reset_nonce'] ) : '';
 
 		if ( ! wp_verify_nonce( $reset_nonce, 'iwp_reset_plugin' ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-hosting-migration' ) ] );
+			wp_send_json_error( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ] );
 		}
 
 		delete_option( 'iwp_demo_site_id' );
