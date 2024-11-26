@@ -36,17 +36,59 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				$this->set_locale();
 			}
 
-			Helper::set_api_domain( INSTAWP_API_DOMAIN );
+			if ( ! defined( 'INSTAWP_API_DOMAIN' ) ) {
+				add_action( 'admin_notices', array( $this, 'notice_missing_required_settings' ) );
+			} else {
+				Helper::set_api_domain( INSTAWP_API_DOMAIN );
 
-			self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
-			$this->redirect_url    = esc_url( sprintf( '%s/%s?d_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, Helper::get_connect_uuid() ) );
+				self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
+				$this->redirect_url    = esc_url( sprintf( '%s/%s?d_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, Helper::get_connect_uuid() ) );
 
-			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-			add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
-			add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
-			add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
+				add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+				add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
+				add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
+				add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
+				add_action( 'init', array( $this, 'check_site_demo' ) );
+				$this->check_update();
+			}
+		}
 
-			$this->check_update();
+		/**
+		 * Check if the site is a demo site and if it was created through extendify.
+		 *
+		 * @return void
+		 */
+		public function check_site_demo() {
+			if ( class_exists('Extendify') || class_exists('ExtendifySdk') ) {
+				// Prevent 
+				if( ! get_option( 'extendify_launch_loaded', false ) ) {
+					$iwp_demo_site_id = get_option( 'iwp_demo_site_id' );
+					if( ! empty( $iwp_demo_site_id ) ) {
+						// extendify/src/Launch/LaunchPage.jsx
+						$date = new DateTime();
+						$date = $date->format('Y-m-d\TH:i:s.v\Z'); // toISOString
+						\update_option( 'extendify_launch_loaded', $date );
+						\update_option( 'extendify_attempted_redirect_count', 1 );
+            			\update_option( 'extendify_attempted_redirect', gmdate('Y-m-d H:i:s') );
+					}
+				}
+			}
+		}
+
+		/**
+		 * Displays an admin notice for missing required constants.
+		 *
+		 * This function is triggered when certain required constants
+		 * are not defined, alerting the admin user via a notice.
+		 */
+		public function notice_missing_required_settings() {
+			printf( 
+				'<div class="%1$s"><p>%2$s <strong>%3$s</strong> %4$s</p></div>', 
+				'notice notice-warning is-dismissible', 
+				__( 'Missing IWP migration settings. Please check', 'iwp-hosting-migration'),
+				'IWP Migration Helper Settings',
+				__( 'plugin is installed, activated and configured properly.', 'iwp-hosting-migration'),
+			);
 		}
 
 		/**
@@ -231,4 +273,4 @@ require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-ajax.php';
 
-IWP_HOSTING_MIG_Main::instance();
+add_action( 'plugin_loaded', array( 'IWP_HOSTING_MIG_Main', 'instance' ) );
