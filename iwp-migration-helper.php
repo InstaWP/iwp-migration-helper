@@ -60,16 +60,16 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		 */
 		public function check_site_demo() {
 			if ( class_exists('Extendify') || class_exists('ExtendifySdk') ) {
-				// Prevent 
-				if( ! get_option( 'extendify_launch_loaded', false ) ) {
-					$iwp_demo_site_id = get_option( 'iwp_demo_site_id' );
-					if( ! empty( $iwp_demo_site_id ) ) {
+				// Prevent launch onboarding if its a demo site
+				$iwp_demo_site_id = get_option( 'iwp_demo_site_id' );
+				if( ! empty( $iwp_demo_site_id ) ) {
+					if( ! get_option( 'extendify_launch_loaded', false ) ) {
 						// extendify/src/Launch/LaunchPage.jsx
 						$date = new DateTime();
 						$date = $date->format('Y-m-d\TH:i:s.v\Z'); // toISOString
 						\update_option( 'extendify_launch_loaded', $date );
 						\update_option( 'extendify_attempted_redirect_count', 1 );
-            			\update_option( 'extendify_attempted_redirect', gmdate('Y-m-d H:i:s') );
+						\update_option( 'extendify_attempted_redirect', gmdate('Y-m-d H:i:s') );
 					}
 				}
 			}
