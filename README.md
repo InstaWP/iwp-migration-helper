@@ -40,6 +40,12 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
+#### 1.0.7 - 03 December 2024
+
+- FIX - Added fix for redirection to Extendify.
+- FIX - Added require setting constants check. 
+- FIX - Fixed wp-config table prefix issue in the migration flow. 
+
 #### 1.0.6 - 20 November 2024
 
 - FIX - Added missing plugin main file.
