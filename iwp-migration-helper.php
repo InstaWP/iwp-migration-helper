@@ -43,34 +43,39 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 				self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
 				$this->redirect_url    = esc_url( sprintf( '%s/%s?d_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, Helper::get_connect_uuid() ) );
-
 				add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-				add_action( 'plugins_loaded', array( $this, 'load_text_domain' ) );
 				add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 				add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
-				add_action( 'init', array( $this, 'check_site_demo' ) );
+				add_action( 'init', array( $this, 'check_extendify_demo_launch' ) );
+				$this->load_text_domain();
 				$this->check_update();
 			}
 		}
 
 		/**
-		 * Check if the site is a demo site and if it was created through extendify.
+		 * Check and prevent extendify demo launch.
 		 *
 		 * @return void
 		 */
-		public function check_site_demo() {
+		public function check_extendify_demo_launch() {
 			if ( class_exists('Extendify') || class_exists('ExtendifySdk') ) {
+				$extendify_launch_loaded = get_option( 'extendify_launch_loaded' );
+				if( ! empty( $extendify_launch_loaded ) ) {
+					return;
+				}
 				// Prevent launch onboarding if its a demo site
 				$iwp_demo_site_id = get_option( 'iwp_demo_site_id' );
+				if ( empty( $iwp_demo_site_id ) ) {
+					iwp_get_demo_site_data();
+					$iwp_demo_site_id = get_option( 'iwp_demo_site_id' );
+				}
 				if( ! empty( $iwp_demo_site_id ) ) {
-					if( ! get_option( 'extendify_launch_loaded', false ) ) {
-						// extendify/src/Launch/LaunchPage.jsx
-						$date = new DateTime();
-						$date = $date->format('Y-m-d\TH:i:s.v\Z'); // toISOString
-						\update_option( 'extendify_launch_loaded', $date );
-						\update_option( 'extendify_attempted_redirect_count', 1 );
-						\update_option( 'extendify_attempted_redirect', gmdate('Y-m-d H:i:s') );
-					}
+					// extendify/src/Launch/LaunchPage.jsx
+					$date = new DateTime();
+					$date = $date->format('Y-m-d\TH:i:s.v\Z'); // toISOString
+					\update_option( 'extendify_launch_loaded', $date );
+					\update_option( 'extendify_attempted_redirect_count', 1 );
+					\update_option( 'extendify_attempted_redirect', gmdate('Y-m-d H:i:s') );
 				}
 			}
 		}
@@ -233,6 +238,9 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		}
 
 		function load_text_domain() {
+			if ( ! function_exists( 'load_plugin_textdomain' ) ) {
+				return;
+			}
 			load_plugin_textdomain( 'iwp-hosting-mig', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 		}
 
