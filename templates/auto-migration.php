@@ -26,19 +26,19 @@ if ( ! empty( $iwp_demo_site_url ) ) {
 
 	$iwp_demo_created_at_str = $date->format( 'jS M Y, g:i a' );
 	$iwp_am_settings         = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) [];
-	$iwp_text_heading        = isset( $iwp_am_settings->text_heading ) ? __( $iwp_am_settings->text_heading, 'iwp-hosting-migration' ) : __( 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.', 'iwp-hosting-migration' );
+	$iwp_text_heading        = isset( $iwp_am_settings->text_heading ) ? __( $iwp_am_settings->text_heading, 'iwp-migration-helper' ) : __( 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.', 'iwp-migration-helper' );
 	$iwp_text_heading        = str_replace( array( "{demo_site_url}", "{demo_created_at}" ), array( $iwp_demo_site_url, $iwp_demo_created_at_str ), $iwp_text_heading );
-	$iwp_text_description    = $iwp_am_settings->text_desc ?? esc_html__( 'Transfer or Migrate the site here.', 'iwp-hosting-migration' );
+	$iwp_text_description    = $iwp_am_settings->text_desc ?? esc_html__( 'Transfer or Migrate the site here.', 'iwp-migration-helper' );
 } else {
-	$iwp_text_heading     = esc_html__( 'We could not found any website to migration!', 'iwp-hosting-migration' );
-	$iwp_text_description = esc_html__( 'Please try again with the reset button.', 'iwp-hosting-migration' );
+	$iwp_text_heading     = esc_html__( 'We could not found any website to migration!', 'iwp-migration-helper' );
+	$iwp_text_description = esc_html__( 'Please try again with the reset button.', 'iwp-migration-helper' );
 	$wrapper_classes[]    = 'no-website-found';
 }
 
 ?>
 
 <div class="<?php echo esc_attr( implode( ' ', $wrapper_classes ) ); ?>">
-    <span class="iwp-reset" data-reset-nonce="<?php echo wp_create_nonce( 'iwp_reset_plugin' ); ?>"><?php esc_html_e( 'Reset', 'iwp-hosting-migration' ); ?></span>
+    <span class="iwp-reset" data-reset-nonce="<?php echo wp_create_nonce( 'iwp_reset_plugin' ); ?>"><?php esc_html_e( 'Reset', 'iwp-migration-helper' ); ?></span>
 
 	<?php printf( '<h3 class="iwp-text-header">%s</h3>', $iwp_text_heading ); ?>
 
@@ -49,7 +49,7 @@ if ( ! empty( $iwp_demo_site_url ) ) {
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1.33301 1.33398V5.50065H1.81761M14.6148 7.16732C14.2047 3.87872 11.3994 1.33398 7.99967 1.33398C5.20186 1.33398 2.80658 3.05746 1.81761 5.50065M1.81761 5.50065H5.49967M14.6663 14.6673V10.5007H14.1817M14.1817 10.5007C13.1928 12.9438 10.7975 14.6673 7.99967 14.6673C4.59999 14.6673 1.79467 12.1226 1.38459 8.83398M14.1817 10.5007H10.4997" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span><?php esc_attr_e( 'Transfer Site', 'iwp-hosting-migration' ); ?></span>
+            <span><?php esc_attr_e( 'Transfer Site', 'iwp-migration-helper' ); ?></span>
         </button>
 	<?php endif; ?>
 
