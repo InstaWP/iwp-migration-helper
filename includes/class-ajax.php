@@ -130,6 +130,7 @@ class IWP_HOSTING_Ajax {
 		}
 
 		$extra_settings     = array(
+			'mode'         => 'push',
 			'retain_user'  => true,
 			'user_details' => array(
 				'data'  => $current_user_data,
