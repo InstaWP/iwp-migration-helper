@@ -32,6 +32,7 @@ class IWP_HOSTING_Ajax {
 		delete_option( 'iwp_demo_site_id' );
 		delete_option( 'iwp_demo_site_url' );
 		delete_option( 'iwp_demo_created_at' );
+		delete_option( 'iwp_demo_error_counter' );
 
 		iwp_get_demo_site_data();
 
@@ -130,9 +131,10 @@ class IWP_HOSTING_Ajax {
 		}
 
 		$extra_settings     = array(
-			'mode'         => 'push',
-			'retain_user'  => true,
-			'user_details' => array(
+			'mode'           => 'push',
+			'auto_migration' => true,
+			'retain_user'    => true,
+			'user_details'   => array(
 				'data'  => $current_user_data,
 				'caps'  => $current_user->caps,
 				'roles' => $current_user->roles
