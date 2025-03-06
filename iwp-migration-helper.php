@@ -3,7 +3,7 @@
 	Plugin Name: InstaWP Migration Helper
 	Plugin URI: https://instawp.com/hosting-migration/
 	Description: Migration helper plugin for hosting providers.
-	Version: 1.0.7
+	Version: 1.0.8
 	Text Domain: iwp-migration-helper
 	Author: InstaWP Team
 	Author URI: https://instawp.com/
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.0.7' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.0.8' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -58,6 +58,11 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		 * @return void
 		 */
 		public function check_extendify_demo_launch() {
+
+			if ( ! is_admin() ) {
+				return;
+			}
+
 			if ( class_exists( 'Extendify' ) || class_exists( 'ExtendifySdk' ) ) {
 				$extendify_launch_loaded = get_option( 'extendify_launch_loaded' );
 				if ( ! empty( $extendify_launch_loaded ) ) {

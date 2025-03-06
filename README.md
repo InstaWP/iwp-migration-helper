@@ -40,6 +40,11 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
+#### 1.0.8 - 06 February 2025
+
+- NEW - Added demo site error counter to prevent infinite api hits.
+- FIX - Fixed Extendify redirection check inside WordPress dashboard only.
+
 #### 1.0.7 - 03 December 2024
 
 - FIX - Added fix for redirection to Extendify.
