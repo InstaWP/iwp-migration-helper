@@ -40,6 +40,10 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
+#### 1.0.9 - 07 May 2025
+
+- FIX - Updated composer dependencies.
+
 #### 1.0.8 - 06 February 2025
 
 - NEW - Added demo site error counter to prevent infinite api hits.
