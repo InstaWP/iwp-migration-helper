@@ -29,14 +29,42 @@ if ( ! function_exists( 'iwp_current_admin_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'iwp_mig_helper_error_log' ) ) {
+	/**
+	 * Log error
+	 *
+	 * @param array $paylod payload
+	 * @param object|null $th
+	 *
+	 * @return void
+	 */
+	function iwp_mig_helper_error_log( $paylod=[], $th = null ) {
+		$log = Option::get_option( 'iwp_mig_helper_error_log' );
+		$log = ! empty( $log ) && is_array( $log ) ? $log : [];
+		$error = $paylod;
+		if ( ! empty( $th ) ) {
+			$error = array_merge( $error, [
+				'time' => date( 'Y-m-d H:i:s' ),
+				'error' => $th->getMessage(),
+				'line' => $th->getLine(),
+				'file' => $th->getFile(),
+			]);
+		}
+
+		$log[] = $error;
+		Option::update_option( 'iwp_mig_helper_error_log', $log );
+	}
+}
+
 
 if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 	/**
 	 * Update demo site data
 	 *
+	 * @param string $demo_url demo site url
 	 * @return bool
 	 */
-	function iwp_get_demo_site_data() {
+	function iwp_get_demo_site_data( $demo_url = '' ) {
 
 		if ( ! defined( 'INSTAWP_API_KEY' ) ) {
 			return false;
@@ -50,7 +78,7 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			return false;
 		}
 
-		$demo_site_args     = [ 'email' => Option::get_option( 'admin_email' ) ];
+		$demo_site_args     = [ 'email' => Option::get_option( 'admin_email' ), 'demo_url' => $demo_url ];
 		$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, [], 'POST', 'v2', INSTAWP_API_KEY );
 
 		if ( isset( $demo_site_args_res['success'] ) && $demo_site_args_res['success'] !== true ) {

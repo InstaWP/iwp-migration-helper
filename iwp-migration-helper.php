@@ -3,7 +3,7 @@
 	Plugin Name: InstaWP Migration Helper
 	Plugin URI: https://instawp.com/hosting-migration/
 	Description: Migration helper plugin for hosting providers.
-	Version: 1.0.9
+	Version: 1.1.0
 	Text Domain: iwp-migration-helper
 	Author: InstaWP Team
 	Author URI: https://instawp.com/
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.0.9' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.0' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -30,6 +30,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 		private $redirect_url;
 
+		public $iwp_ajax;
+
 		function __construct() {
 
 			if ( is_admin() ) {
@@ -39,6 +41,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			if ( ! defined( 'INSTAWP_API_DOMAIN' ) || ! defined( 'INSTAWP_API_KEY' ) || ! defined( 'INSTAWP_MIGRATE_ENDPOINT' ) ) {
 				add_action( 'admin_notices', array( $this, 'notice_missing_required_settings' ) );
 			} else {
+				$this->iwp_ajax = new IWP_HOSTING_Ajax();
 				Helper::set_api_domain( INSTAWP_API_DOMAIN );
 
 				self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
@@ -47,6 +50,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 				add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
 				add_action( 'init', array( $this, 'check_extendify_demo_launch' ) );
+				add_action( 'init', array( $this, 'auto_background_migration' ) );
 				$this->load_text_domain();
 				$this->check_update();
 			}
@@ -82,6 +86,47 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					\update_option( 'extendify_attempted_redirect_count', 1 );
 					\update_option( 'extendify_attempted_redirect', gmdate( 'Y-m-d H:i:s' ) );
 				}
+			}
+		}
+
+		/**
+		 * Auto background migration.
+		 *
+		 */
+		public function auto_background_migration() {
+			try {
+				// If auto migration is required
+				if ( ! defined( 'INSTAWP_AUTO_MIGRATION' ) || ! INSTAWP_AUTO_MIGRATION || ! defined( 'DEMO_SITE_URL' ) || empty( DEMO_SITE_URL ) || ! filter_var( esc_url( DEMO_SITE_URL ), FILTER_VALIDATE_URL ) ) {
+					return;
+				}
+
+				$mig_initiated = get_option( 'iwp_auto_bg_mig_initiated' );
+
+				if ( ! empty( $mig_initiated ) ) {
+					return;
+				}
+
+				update_option( 'iwp_auto_bg_mig_initiated', true );
+
+				// Get demo site data
+				iwp_get_demo_site_data( DEMO_SITE_URL );
+
+				// Install plugin
+				$this->iwp_ajax->install_plugin();
+
+				// Set API key
+				$this->iwp_ajax->set_api_key();
+
+				// Connect demo site
+				$this->iwp_ajax->connect_demo_site();
+
+				// Initiate migration
+				$this->iwp_ajax->initiate_migration();
+
+			} catch (\Throwable $th) {
+				iwp_mig_helper_error_log( [
+					'message' => 'auto_background_migration exception',
+				], $th );
 			}
 		}
 
