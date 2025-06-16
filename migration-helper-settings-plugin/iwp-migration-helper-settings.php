@@ -17,6 +17,14 @@ defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.in
 
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate/<slug>' );
 
+/**
+ * To enable automatic migration upon plugin activation, 
+ * define DEMO_SITE_URL and 
+ * set INSTAWP_AUTO_MIGRATION to true
+ */
+// Demo site url
+// defined( 'DEMO_SITE_URL' ) || define( 'DEMO_SITE_URL', '<demo site url>' );
+
 // If auto migration is required.
 // defined( 'INSTAWP_AUTO_MIGRATION' ) || define( 'INSTAWP_AUTO_MIGRATION', true );
 

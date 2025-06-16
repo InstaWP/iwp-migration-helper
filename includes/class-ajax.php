@@ -12,13 +12,18 @@ defined( 'ABSPATH' ) || exit;
 
 class IWP_HOSTING_Ajax {
 
-	function __construct() {
+	/**
+	 * Check if the current request is an AJAX request
+	 */
+	private $is_ajax = true;
 
+	function __construct() {
 		add_action( 'wp_ajax_iwp_install_plugin', array( $this, 'install_plugin' ) );
 		add_action( 'wp_ajax_iwp_set_api_key', array( $this, 'set_api_key' ) );
 		add_action( 'wp_ajax_iwp_connect_demo_site', array( $this, 'connect_demo_site' ) );
 		add_action( 'wp_ajax_iwp_initiate_migration', array( $this, 'initiate_migration' ) );
 		add_action( 'wp_ajax_iwp_reset_side_data', array( $this, 'reset_side_data' ) );
+		$this->is_ajax = function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax(): true;
 	}
 
 	function reset_side_data() {
@@ -26,7 +31,7 @@ class IWP_HOSTING_Ajax {
 		$reset_nonce = isset( $_POST['reset_nonce'] ) ? sanitize_text_field( $_POST['reset_nonce'] ) : '';
 
 		if ( ! wp_verify_nonce( $reset_nonce, 'iwp_reset_plugin' ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ] );
+			$this->send_response( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ], true );
 		}
 
 		delete_option( 'iwp_demo_site_id' );
@@ -36,7 +41,19 @@ class IWP_HOSTING_Ajax {
 
 		iwp_get_demo_site_data();
 
-		wp_send_json_success( [ 'message' => esc_html__( 'Deleted demo site data successfully.' ) ] );
+		$this->send_response( [ 'message' => esc_html__( 'Deleted demo site data successfully.' ) ] );
+	}
+
+	function send_response( $response, $error = false ) {
+		if ( ! $this->is_ajax ) {
+			return array( 'response' => $response, 'success' => ! $error );
+		}
+
+		if ( $error ) {
+			wp_send_json_error( $response );
+		} else {
+			wp_send_json_success( $response );
+		}
 	}
 
 	function install_plugin() {
@@ -46,7 +63,7 @@ class IWP_HOSTING_Ajax {
 		}
 
 		if ( is_plugin_active( sprintf( '%1$s/%1$s.php', 'instawp-connect' ) ) ) {
-			wp_send_json_success( [ 'message' => esc_html__( 'Connect plugin is already installed and activated.' ) ] );
+			$this->send_response( [ 'message' => esc_html__( 'Connect plugin is already installed and activated.' ) ] );
 		}
 
 		$installer = new Installer(
@@ -60,35 +77,36 @@ class IWP_HOSTING_Ajax {
 		);
 		$response  = $installer->start();
 
-		wp_send_json_success( [ 'message' => esc_html__( 'Plugin activated successfully.' ), 'response' => $response ] );
+		$this->send_response( [ 'message' => esc_html__( 'Plugin activated successfully.' ), 'response' => $response ] );
+		
 	}
 
 	function set_api_key() {
 
 		if ( ! empty( Helper::get_api_key() ) ) {
-			wp_send_json_success( [ 'message' => esc_html__( 'Website is already connected.' ) ] );
+			$this->send_response( [ 'message' => esc_html__( 'Website is already connected.' ) ] );
 		}
 
 		$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ) );
 
 		if ( ! $connect_response ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Website could not connect successfully.' ), 'response' => $connect_response ] );
+			$this->send_response( [ 'message' => esc_html__( 'Website could not connect successfully.' ), 'response' => $connect_response ], true );
 		}
 
-		wp_send_json_success( [ 'message' => esc_html__( 'Website connected successfully.' ), 'response' => $connect_response ] );
+		$this->send_response( [ 'message' => esc_html__( 'Website connected successfully.' ), 'response' => $connect_response ] );
 	}
 
 	function connect_demo_site() {
 
 		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Could not find the demo site details.' ) ] );
+			$this->send_response( [ 'message' => esc_html__( 'Could not find the demo site details.' ) ], true );
 		}
 
 		$install_connect_args = [ 'destination_connect_id' => Helper::get_connect_id() ];
 		$install_connect_res  = Curl::do_curl( "sites/{$iwp_demo_site_id}/install-connect", $install_connect_args );
 
 		if ( isset( $install_connect_res['success'] ) && $install_connect_res['success'] !== true ) {
-			wp_send_json_error( [ 'message' => Helper::get_args_option( 'message', $install_connect_res ) ] );
+			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $install_connect_res ) ], true );
 		}
 
 		$install_connect_res_data   = Helper::get_args_option( 'data', $install_connect_res );
@@ -96,23 +114,23 @@ class IWP_HOSTING_Ajax {
 		$iwp_demo_site_connect_uuid = Helper::get_args_option( 'connect_uuid', $install_connect_res_data );
 
 		if ( empty( $iwp_demo_site_connect_id ) || empty( $iwp_demo_site_connect_uuid ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Could not get proper response from connect install on the demo site.' ), 'response' => $install_connect_res ] );
+			$this->send_response( [ 'message' => esc_html__( 'Could not get proper response from connect install on the demo site.' ), 'response' => $install_connect_res ], true );
 		}
 
 		update_option( 'iwp_demo_site_connect_id', $iwp_demo_site_connect_id );
 		update_option( 'iwp_demo_site_connect_uuid', $iwp_demo_site_connect_uuid );
 
-		wp_send_json_success( [ 'message' => esc_html__( 'Demo website is connected successfully.' ) ] );
+		$this->send_response( [ 'message' => esc_html__( 'Demo website is connected successfully.' ) ] );
 	}
 
 	function initiate_migration() {
 
 		if ( ! function_exists( 'instawp' ) || empty( Helper::get_connect_id() ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Website was not connected successfully.' ) ] );
+			$this->send_response( [ 'message' => esc_html__( 'Website was not connected successfully.' ) ], true );
 		}
 
 		if ( empty( $iwp_demo_site_connect_id = Option::get_option( 'iwp_demo_site_connect_id', '' ) ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Could not find demo site details.' ) ] );
+			$this->send_response( [ 'message' => esc_html__( 'Could not find demo site details.' ) ], true );
 		}
 
 		global $wp_version, $current_user;
@@ -158,7 +176,7 @@ class IWP_HOSTING_Ajax {
 		$initiate_push_res  = Curl::do_curl( 'migrates-v3/push', $initiate_push_args );
 
 		if ( isset( $initiate_push_res['success'] ) && $initiate_push_res['success'] !== true ) {
-			wp_send_json_error( [ 'message' => Helper::get_args_option( 'message', $initiate_push_res ) ] );
+			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $initiate_push_res ) ], true );
 		}
 
 		$initiate_push_res_data   = Helper::get_args_option( 'data', $initiate_push_res );
@@ -168,7 +186,7 @@ class IWP_HOSTING_Ajax {
 		$iwp_migrate_tracking_url = Helper::get_args_option( 'tracking_url', $initiate_push_res_data );
 
 		if ( empty( $iwp_migrate_id ) || empty( $iwp_migrate_key ) || empty( $iwp_migrate_uuid ) || empty( $iwp_migrate_tracking_url ) ) {
-			wp_send_json_error( [ 'message' => esc_html__( 'Could not get proper data from migration initiation response.' ) ] );
+			$this->send_response( [ 'message' => esc_html__( 'Could not get proper data from migration initiation response.' ) ], true );
 		}
 
 		update_option( 'iwp_migrate_id', $iwp_migrate_id );
@@ -176,7 +194,7 @@ class IWP_HOSTING_Ajax {
 		update_option( 'iwp_migrate_uuid', $iwp_migrate_uuid );
 		update_option( 'iwp_migrate_tracking_url', $iwp_migrate_tracking_url );
 
-		wp_send_json_success( [ 'message' => esc_html__( 'Migration initiated successfully. You are going to be redirected to the tracking page.' ), 'iwp_migrate_tracking_url' => $iwp_migrate_tracking_url ] );
+		$this->send_response( [ 'message' => esc_html__( 'Migration initiated successfully. You are going to be redirected to the tracking page.' ), 'iwp_migrate_tracking_url' => $iwp_migrate_tracking_url ] );
 	}
 }
 
