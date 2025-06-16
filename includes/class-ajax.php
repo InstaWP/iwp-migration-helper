@@ -46,7 +46,7 @@ class IWP_HOSTING_Ajax {
 
 	function send_response( $response, $error = false ) {
 		if ( ! $this->is_ajax ) {
-			return array( 'response' => $response, 'success' => $error );
+			return array( 'response' => $response, 'success' => ! $error );
 		}
 
 		if ( $error ) {
