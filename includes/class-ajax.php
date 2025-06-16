@@ -197,3 +197,5 @@ class IWP_HOSTING_Ajax {
 		$this->send_response( [ 'message' => esc_html__( 'Migration initiated successfully. You are going to be redirected to the tracking page.' ), 'iwp_migrate_tracking_url' => $iwp_migrate_tracking_url ] );
 	}
 }
+
+new IWP_HOSTING_Ajax();

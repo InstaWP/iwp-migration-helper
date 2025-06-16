@@ -29,12 +29,76 @@ if ( ! function_exists( 'iwp_current_admin_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'iwp_cant_auto_bg_migration' ) ) {
+	/**
+	 * Check if auto migration can not be done
+	 * 
+	 * @return bool
+	 */
+	function iwp_cant_auto_bg_migration() {
+		return ( ! defined( 'DEMO_SITE_URL' ) || empty( DEMO_SITE_URL ) || ! filter_var( esc_url( DEMO_SITE_URL ), FILTER_VALIDATE_URL ) || ! defined( 'INSTAWP_AUTO_MIGRATION' ) || ! INSTAWP_AUTO_MIGRATION );
+	}
+	
+}
+
+if ( ! function_exists( 'iwp_mig_helper_auto_bg_migration' ) ) {
+	/**
+	 * Get error log
+	 *
+	 */
+	function iwp_mig_helper_auto_bg_migration() {
+		try {
+
+			if ( ! defined( 'INSTAWP_API_DOMAIN' ) || ! defined( 'INSTAWP_API_KEY' ) ) {
+				iwp_mig_helper_error_log( [
+					'message' => 'INSTAWP_API_KEY and INSTAWP_API_DOMAIN are not defined.',
+				]);
+				return;
+			}
+			// If auto migration is required
+			if ( iwp_cant_auto_bg_migration() ) {
+				return;
+			}
+
+			$iwp_ajax = new IWP_HOSTING_Ajax();
+			Helper::set_api_domain( INSTAWP_API_DOMAIN );
+
+			$mig_initiated = get_option( 'iwp_auto_bg_mig_initiated' );
+
+			if ( ! empty( $mig_initiated ) ) {
+				return;
+			}
+
+			update_option( 'iwp_auto_bg_mig_initiated', true );
+
+			// Get demo site data
+			iwp_get_demo_site_data( DEMO_SITE_URL );
+
+			// Install plugin
+			$iwp_ajax->install_plugin();
+
+			// Set API key
+			$iwp_ajax->set_api_key();
+
+			// Connect demo site
+			$iwp_ajax->connect_demo_site();
+
+			// Initiate migration
+			$iwp_ajax->initiate_migration();
+
+		} catch (\Throwable $th) {
+			iwp_mig_helper_error_log( [
+				'message' => 'iwp_mig_helper_auto_bg_migration exception',
+			], $th );
+		}
+	}
+}
 if ( ! function_exists( 'iwp_mig_helper_error_log' ) ) {
 	/**
 	 * Log error
 	 *
 	 * @param array $paylod payload
-	 * @param object|null $th
+	 * @param Throwable|null $th
 	 *
 	 * @return void
 	 */
