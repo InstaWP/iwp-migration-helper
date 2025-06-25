@@ -161,6 +161,11 @@
     transition: 0.3s;
 }
 
+.iwp-auto-migration .iwp-btn-transfer.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 .iwp-auto-migration .iwp-btn-transfer.loading > svg {
     animation: loading 1s linear infinite;
 }
@@ -182,9 +187,11 @@
     0% {
         transform: rotate(0deg)
     }
+
     50% {
         transform: rotate(180deg)
     }
+
     100% {
         transform: rotate(360deg)
     }

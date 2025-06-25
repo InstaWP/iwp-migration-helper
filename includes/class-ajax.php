@@ -18,7 +18,7 @@ class IWP_HOSTING_Ajax {
 	private $is_ajax = true;
 
 	function __construct() {
-		add_action( 'wp_ajax_iwp_install_plugin', array( $this, 'install_plugin' ) );
+		add_action( 'wp_ajax_iwp_set_data_install_plugin', array( $this, 'set_site_data_and_install_plugin' ) );
 		add_action( 'wp_ajax_iwp_set_api_key', array( $this, 'set_api_key' ) );
 		add_action( 'wp_ajax_iwp_connect_demo_site', array( $this, 'connect_demo_site' ) );
 		add_action( 'wp_ajax_iwp_initiate_migration', array( $this, 'initiate_migration' ) );
@@ -44,20 +44,42 @@ class IWP_HOSTING_Ajax {
 		$this->send_response( [ 'message' => esc_html__( 'Deleted demo site data successfully.' ) ] );
 	}
 
-	function send_response( $response, $error = false ) {
+	// Check nonce
+	function check_nonce() {
 		if ( ! $this->is_ajax ) {
+			return true;
+		}
+
+		$iwp_nonce = isset( $_POST['iwp_nonce'] ) ? sanitize_text_field( $_POST['iwp_nonce'] ) : '';
+		if ( empty( $iwp_nonce) || ! wp_verify_nonce( $iwp_nonce, 'iwp_mig_nonce' ) ) {
+			$this->send_response( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ], true );
+		}
+		return true;
+	}
+
+	/**
+	 * Send response
+	 * 
+	 * @param array $response The response.
+	 * @param bool  $error   The error.
+	 * 
+	 * @return array The response.
+	 */
+	function send_response( $response, $error = false ) {
+		if ( $error ) {
+			if ( ! $this->is_ajax ) {
+				delete_option( 'iwp_auto_bg_mig_initiated' );
+				iwp_mig_helper_error_log( $response );
+			}
+			wp_send_json_error( $response );
+		} else if ( ! $this->is_ajax ) {
 			return array( 'response' => $response, 'success' => ! $error );
 		}
 
-		if ( $error ) {
-			wp_send_json_error( $response );
-		} else {
-			wp_send_json_success( $response );
-		}
+		wp_send_json_success( $response );
 	}
 
 	function install_plugin() {
-
 		if ( ! function_exists( 'get_plugins' ) || ! function_exists( 'get_mu_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -78,11 +100,24 @@ class IWP_HOSTING_Ajax {
 		$response  = $installer->start();
 
 		$this->send_response( [ 'message' => esc_html__( 'Plugin activated successfully.' ), 'response' => $response ] );
-		
+	}
+
+	function set_site_data_and_install_plugin() {
+		$this->check_nonce();
+		if ( ! empty( $_POST['demo_site_url'] ) ) {
+			// Sanitize demo site url
+			$demo_site_url = esc_url( wp_unslash( $_POST['demo_site_url'] ) );
+			if ( filter_var( $demo_site_url, FILTER_VALIDATE_URL ) ) {
+				// Get demo site data
+				iwp_get_demo_site_data( $demo_site_url );
+			}
+		}
+
+		$this->install_plugin();
 	}
 
 	function set_api_key() {
-
+		$this->check_nonce();
 		if ( ! empty( Helper::get_api_key() ) ) {
 			$this->send_response( [ 'message' => esc_html__( 'Website is already connected.' ) ] );
 		}
@@ -97,7 +132,7 @@ class IWP_HOSTING_Ajax {
 	}
 
 	function connect_demo_site() {
-
+		$this->check_nonce();
 		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
 			$this->send_response( [ 'message' => esc_html__( 'Could not find the demo site details.' ) ], true );
 		}
@@ -124,7 +159,7 @@ class IWP_HOSTING_Ajax {
 	}
 
 	function initiate_migration() {
-
+		$this->check_nonce();
 		if ( ! function_exists( 'instawp' ) || empty( Helper::get_connect_id() ) ) {
 			$this->send_response( [ 'message' => esc_html__( 'Website was not connected successfully.' ) ], true );
 		}

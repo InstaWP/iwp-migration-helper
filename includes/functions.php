@@ -87,6 +87,7 @@ if ( ! function_exists( 'iwp_mig_helper_auto_bg_migration' ) ) {
 			$iwp_ajax->initiate_migration();
 
 		} catch (\Throwable $th) {
+			delete_option( 'iwp_auto_bg_mig_initiated' );
 			iwp_mig_helper_error_log( [
 				'message' => 'iwp_mig_helper_auto_bg_migration exception',
 			], $th );
@@ -131,6 +132,13 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 	function iwp_get_demo_site_data( $demo_url = '' ) {
 
 		if ( ! defined( 'INSTAWP_API_KEY' ) ) {
+			return false;
+		}
+
+		if ( empty( $demo_url ) && ( ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX ) || ( defined( 'DEMO_SITE_URL' ) && ! empty( DEMO_SITE_URL ) ) ) ) {
+			iwp_mig_helper_error_log( [
+				'message' => 'iwp_get_demo_site_data empty demo_url',
+			] );
 			return false;
 		}
 

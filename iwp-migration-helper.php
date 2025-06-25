@@ -3,7 +3,7 @@
 	Plugin Name: InstaWP Migration Helper
 	Plugin URI: https://instawp.com/hosting-migration/
 	Description: Migration helper plugin for hosting providers.
-	Version: 1.1.0
+	Version: 1.1.1
 	Text Domain: iwp-migration-helper
 	Author: InstaWP Team
 	Author URI: https://instawp.com/
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.0' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.1' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -49,6 +49,26 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				add_action( 'init', array( $this, 'check_extendify_demo_launch' ) );
 				$this->load_text_domain();
 				$this->check_update();
+			} else {
+				add_action( 'admin_enqueue_scripts', array( $this, 'redirect_to_migration_page' ) );
+			}
+		}
+
+		/**
+		 * Redirect to migration page.
+		 * 
+		 * @param $hook 
+		 */
+		public function redirect_to_migration_page($hook) {
+			if ( 'plugins.php' === $hook && function_exists( 'is_admin' ) && is_admin() && function_exists( 'wp_redirect' ) ) {
+				$redirect_url = get_option( 'iwp_migrate_tracking_url' );
+				if ( ! empty( $redirect_url ) && filter_var( $redirect_url, FILTER_VALIDATE_URL ) ) {
+					delete_option( 'iwp_migrate_tracking_url' );
+					delete_option( 'iwp_auto_bg_mig_initiated' );
+					if ( wp_redirect( $redirect_url ) ) {
+						exit;
+					}
+				}
 			}
 		}
 
@@ -253,8 +273,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			$localize_scripts = array(
 				'ajax_url'          => admin_url( 'admin-ajax.php' ),
+				'iwp_nonce'     	=> wp_create_nonce( 'iwp_mig_nonce' ),	
 				'copy_text'         => __( 'Copied.', 'iwp-migration-helper' ),
 				'text_transferring' => __( 'Transferring...', 'iwp-migration-helper' ),
+				'has_demo_url_box'  => ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX ),
 			);
 
 			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
