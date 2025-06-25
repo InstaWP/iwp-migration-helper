@@ -25,7 +25,14 @@ defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'mi
 // Demo site url
 // defined( 'DEMO_SITE_URL' ) || define( 'DEMO_SITE_URL', '<demo site url>' );
 
+/**
+ * To enable DEMO_SITE_URL input box in auto migration option,
+ * set DEMO_SITE_URL_INPUT_BOX to true
+ * set INSTAWP_AUTO_MIGRATION to true
+ */
+// defined( 'DEMO_SITE_URL_INPUT_BOX' ) || define( 'DEMO_SITE_URL_INPUT_BOX', true );
+
 // If auto migration is required.
 // defined( 'INSTAWP_AUTO_MIGRATION' ) || define( 'INSTAWP_AUTO_MIGRATION', true );
 
-define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.","text_desc":"Transfer or Migrate the site here?","transfer_btn_text":"Transfer Site","transfer_btn_style":"background: #11BF85; border-color: #11BF85; color: #fff;","transfer_btn_style_hover":"background: #14855f; border-color: #14855f;","custom_css":".iwp-auto-migration h3.iwp-text-header > span { color: #14855f; }"}' );
+define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.","text_desc":"Transfer or Migrate the site here?","transfer_btn_text":"Transfer Site","transfer_btn_style":"background: #11BF85; border-color: #11BF85; color: #fff;","transfer_btn_style_hover":"background: #14855f; border-color: #14855f;","custom_css":".iwp-auto-migration h3.iwp-text-header > span { color: #14855f; }","migration_btn_wrapper_style":"display: flex;flex-direction: column;gap: 1rem;max-width: 300px;"}' );

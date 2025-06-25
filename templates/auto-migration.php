@@ -18,14 +18,21 @@ if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_de
 	$iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
 }
 
-if ( ! empty( $iwp_demo_site_url ) ) {
+$has_url_box = ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX );
+$demo_site_url = ( $has_url_box && defined( 'DEMO_SITE_URL' ) && ! empty( DEMO_SITE_URL ) ) ? DEMO_SITE_URL : '';
+$iwp_am_settings         = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) [];
+$btn_disabled = '';
+if ( $has_url_box ) {
+    $iwp_text_heading        = $iwp_am_settings->text_heading ?? esc_html__( 'Transfer or Migrate the site', 'iwp-migration-helper' );
+	$iwp_text_description    = $iwp_am_settings->text_desc ?? esc_html__( 'Enter the demo site url.', 'iwp-migration-helper' );
+    $btn_disabled            = 'disabled';
+} else if ( ! empty( $iwp_demo_site_url ) ) {
 
 	$date = new DateTime();
 	$date->setTimestamp( intval( $iwp_demo_created_at ) );
 	$date->setTimezone( wp_timezone() );
 
 	$iwp_demo_created_at_str = $date->format( 'jS M Y, g:i a' );
-	$iwp_am_settings         = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) [];
 	$iwp_text_heading        = isset( $iwp_am_settings->text_heading ) ? __( $iwp_am_settings->text_heading, 'iwp-migration-helper' ) : __( 'We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.', 'iwp-migration-helper' );
 	$iwp_text_heading        = str_replace( array( "{demo_site_url}", "{demo_created_at}" ), array( $iwp_demo_site_url, $iwp_demo_created_at_str ), $iwp_text_heading );
 	$iwp_text_description    = $iwp_am_settings->text_desc ?? esc_html__( 'Transfer or Migrate the site here.', 'iwp-migration-helper' );
@@ -44,14 +51,20 @@ if ( ! empty( $iwp_demo_site_url ) ) {
 
 	<?php printf( '<p class="iwp-text-content">%s</p>', $iwp_text_description ); ?>
 
-	<?php if ( ! empty( $iwp_demo_site_url ) ) : ?>
-        <button class="iwp-btn-transfer" type="button">
+    <div class="iwp-migration-btn-wrapper">
+    <?php if ( $has_url_box ) : ?>
+        <input type="text" id="iwp-demo-site-url-input" name="demo_site_url" value="<?php echo esc_url( $demo_site_url ); ?>" placeholder="https://demo-site-url.com">
+	<?php endif; ?>
+	<?php if ( ! empty( $iwp_demo_site_url ) || $has_url_box ) : ?>
+        <button class="iwp-btn-transfer <?php echo $btn_disabled; ?>" type="button" <?php echo $btn_disabled; ?>>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1.33301 1.33398V5.50065H1.81761M14.6148 7.16732C14.2047 3.87872 11.3994 1.33398 7.99967 1.33398C5.20186 1.33398 2.80658 3.05746 1.81761 5.50065M1.81761 5.50065H5.49967M14.6663 14.6673V10.5007H14.1817M14.1817 10.5007C13.1928 12.9438 10.7975 14.6673 7.99967 14.6673C4.59999 14.6673 1.79467 12.1226 1.38459 8.83398M14.1817 10.5007H10.4997" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span><?php esc_attr_e( 'Transfer Site', 'iwp-migration-helper' ); ?></span>
         </button>
+        
 	<?php endif; ?>
+    </div>
 
     <svg class="iwp-info-shape" width="135" height="157" viewBox="0 0 135 157" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g clip-path="url(#clip0_30752_25277)">
@@ -188,6 +201,11 @@ if ( ! empty( $iwp_demo_site_url ) ) {
 </div>
 
 <style>
+
+    .iwp-auto-migration .iwp-migration-btn-wrapper {
+    <?php echo esc_attr( $iwp_am_settings->migration_btn_wrapper_style ?? '' ); ?>
+    }
+
     .iwp-auto-migration .iwp-btn-transfer {
     <?php echo esc_attr( $iwp_am_settings->transfer_btn_style ?? '' ); ?>
     }

@@ -55,6 +55,29 @@
         });
     }
 
+    // Get https url
+    function getHttpsUrl(url) {
+        if (!url) {
+            return '';
+        }
+        url = url.replace('http://', 'https://');
+        if (!url.includes('://')) {
+            url = 'https://' + url;
+        }
+        if (url.length < 14) {
+            return '';
+        }
+        return url.endsWith('/') ? url.slice(0, -1) : url;
+    }
+
+    // Get post data
+    function getPostData(action) {
+        return {
+            action: action,
+            iwp_nonce: plugin_object.iwp_nonce,
+        };
+    }
+
     $(document).on('ready', function () {
         let el_notice_wrapper = $('.notice.notice-warning.iwp-hosting-mig-wrap'),
             el_connect_btn = el_notice_wrapper.find('.mig-button'),
@@ -102,9 +125,33 @@
         });
     });
 
+    // Demo site url input box
+    $(document).on('mouseout', '#iwp-demo-site-url-input', function () {
+
+        if (!plugin_object.has_demo_url_box) {
+            return false;
+        }
+
+        let el_input = $(this),
+            el_button = $('button.iwp-btn-transfer');
+
+        if (el_input && el_button) {
+            let demo_site_url = el_input.val();
+            if (demo_site_url) {
+                demo_site_url = getHttpsUrl(demo_site_url);
+                el_input.val(demo_site_url);
+            }
+            demo_site_url = Boolean(demo_site_url);
+            el_button.toggleClass('disabled', !demo_site_url);
+            el_button.prop('disabled', !demo_site_url);
+        }
+    });
+
+    // Auto Migration
     $(document).on('click', 'button.iwp-btn-transfer', function () {
 
         let el_transfer_btn = $(this),
+            el_input = $('#iwp-demo-site-url-input'),
             el_transfer_btn_text = el_transfer_btn.find('span'),
             el_auto_migration_wrap = el_transfer_btn.parent(),
             el_iwp_text_content = el_auto_migration_wrap.find('.iwp-text-content');
@@ -115,35 +162,34 @@
 
         el_transfer_btn.addClass('loading');
         el_transfer_btn_text.html(plugin_object.text_transferring);
-
-        $.post(plugin_object.ajax_url, {
-            action: 'iwp_install_plugin',
-        })
+        const postData = getPostData('iwp_set_data_install_plugin');
+        if (plugin_object.has_demo_url_box) {
+            if (!el_input || !el_input.val()) {
+                console.log('Please enter demo site url.');
+                return false;
+            }
+            postData.demo_site_url = getHttpsUrl(el_input.val());
+        }
+        $.post(plugin_object.ajax_url, postData)
             .then(function (response) {
                 el_iwp_text_content.html(response.data.message);
 
                 if (response.success) {
-                    return $.post(plugin_object.ajax_url, {
-                        action: 'iwp_set_api_key',
-                    });
+                    return $.post(plugin_object.ajax_url, getPostData('iwp_set_api_key'));
                 }
             })
             .then(function (response) {
                 el_iwp_text_content.html(response.data.message);
 
                 if (response.success) {
-                    return $.post(plugin_object.ajax_url, {
-                        action: 'iwp_connect_demo_site',
-                    });
+                    return $.post(plugin_object.ajax_url, getPostData('iwp_connect_demo_site'));
                 }
             })
             .then(function (response) {
                 el_iwp_text_content.html(response.data.message);
 
                 if (response.success) {
-                    return $.post(plugin_object.ajax_url, {
-                        action: 'iwp_initiate_migration',
-                    });
+                    return $.post(plugin_object.ajax_url, getPostData('iwp_initiate_migration'));
                 }
             })
             .then(function (response) {

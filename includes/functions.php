@@ -134,6 +134,13 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			return false;
 		}
 
+		if ( empty( $demo_url ) && ( ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX ) || ( defined( 'DEMO_SITE_URL' ) && ! empty( DEMO_SITE_URL ) ) ) ) {
+			iwp_mig_helper_error_log( [
+				'message' => 'iwp_get_demo_site_data empty demo_url',
+			] );
+			return false;
+		}
+
 		$iwp_demo_error_counter = (int) Option::get_option( 'iwp_demo_error_counter', '0' );
 
 		if ( $iwp_demo_error_counter >= 20 ) {
