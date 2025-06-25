@@ -68,6 +68,7 @@ class IWP_HOSTING_Ajax {
 	function send_response( $response, $error = false ) {
 		if ( $error ) {
 			if ( ! $this->is_ajax ) {
+				delete_option( 'iwp_auto_bg_mig_initiated' );
 				iwp_mig_helper_error_log( $response );
 			}
 			wp_send_json_error( $response );
@@ -78,17 +79,7 @@ class IWP_HOSTING_Ajax {
 		wp_send_json_success( $response );
 	}
 
-	function set_site_data_and_install_plugin() {
-		$this->check_nonce();
-		if ( ! empty( $_POST['demo_site_url'] ) ) {
-			// Sanitize demo site url
-			$demo_site_url = esc_url( wp_unslash( $_POST['demo_site_url'] ) );
-			if ( filter_var( $demo_site_url, FILTER_VALIDATE_URL ) ) {
-				// Get demo site data
-				iwp_get_demo_site_data( $demo_site_url );
-			}
-		}
-
+	function install_plugin() {
 		if ( ! function_exists( 'get_plugins' ) || ! function_exists( 'get_mu_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -109,7 +100,20 @@ class IWP_HOSTING_Ajax {
 		$response  = $installer->start();
 
 		$this->send_response( [ 'message' => esc_html__( 'Plugin activated successfully.' ), 'response' => $response ] );
-		
+	}
+
+	function set_site_data_and_install_plugin() {
+		$this->check_nonce();
+		if ( ! empty( $_POST['demo_site_url'] ) ) {
+			// Sanitize demo site url
+			$demo_site_url = esc_url( wp_unslash( $_POST['demo_site_url'] ) );
+			if ( filter_var( $demo_site_url, FILTER_VALIDATE_URL ) ) {
+				// Get demo site data
+				iwp_get_demo_site_data( $demo_site_url );
+			}
+		}
+
+		$this->install_plugin();
 	}
 
 	function set_api_key() {

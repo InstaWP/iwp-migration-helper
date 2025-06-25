@@ -49,6 +49,26 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				add_action( 'init', array( $this, 'check_extendify_demo_launch' ) );
 				$this->load_text_domain();
 				$this->check_update();
+			} else {
+				add_action( 'admin_enqueue_scripts', array( $this, 'redirect_to_migration_page' ) );
+			}
+		}
+
+		/**
+		 * Redirect to migration page.
+		 * 
+		 * @param $hook 
+		 */
+		public function redirect_to_migration_page($hook) {
+			if ( 'plugins.php' === $hook && function_exists( 'is_admin' ) && is_admin() && function_exists( 'wp_redirect' ) ) {
+				$redirect_url = get_option( 'iwp_migrate_tracking_url' );
+				if ( ! empty( $redirect_url ) && filter_var( $redirect_url, FILTER_VALIDATE_URL ) ) {
+					delete_option( 'iwp_migrate_tracking_url' );
+					delete_option( 'iwp_auto_bg_mig_initiated' );
+					if ( wp_redirect( $redirect_url ) ) {
+						exit;
+					}
+				}
 			}
 		}
 

@@ -87,6 +87,7 @@ if ( ! function_exists( 'iwp_mig_helper_auto_bg_migration' ) ) {
 			$iwp_ajax->initiate_migration();
 
 		} catch (\Throwable $th) {
+			delete_option( 'iwp_auto_bg_mig_initiated' );
 			iwp_mig_helper_error_log( [
 				'message' => 'iwp_mig_helper_auto_bg_migration exception',
 			], $th );
