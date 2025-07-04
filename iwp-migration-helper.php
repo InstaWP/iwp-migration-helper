@@ -11,7 +11,6 @@
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
-use Google\Rpc\Help;
 use InstaWP\Connect\Helpers\Helper;
 use InstaWP\Connect\Helpers\Installer;
 
