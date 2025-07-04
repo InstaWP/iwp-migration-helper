@@ -9,7 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       InstaWP Connect Helpers
- * Version:           1.0.2
+ * Version:           1.0.4
  * Plugin URI:        https://instawp.com
  * Description:       Helpers Package for InstaWP Remote Features.
  * Author:            InstaWP
@@ -17,7 +17,7 @@
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Requires at least: 5.6
- * Tested up to:      6.7
+ * Tested up to:      6.8
  */
 
 defined( 'ABSPATH' ) || exit;

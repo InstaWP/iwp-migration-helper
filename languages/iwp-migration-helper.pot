@@ -5,7 +5,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-06-25 12:50+0000\n"
+"POT-Creation-Date: 2025-07-04 07:42+0000\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -17,67 +17,71 @@ msgstr ""
 msgid "Nonce verification failed!"
 msgstr ""
 
-#: iwp-migration-helper.php:113
+#: iwp-migration-helper.php:119
 msgid "Missing IWP migration settings. Please check"
 msgstr ""
 
-#: iwp-migration-helper.php:115
+#: iwp-migration-helper.php:121
 msgid "plugin is installed, activated and configured properly."
 msgstr ""
 
-#: iwp-migration-helper.php:160
+#: iwp-migration-helper.php:173
 msgid "Plugin activated successfully."
 msgstr ""
 
-#: iwp-migration-helper.php:174
-msgid "Website could not connect successfully."
-msgstr ""
-
-#: iwp-migration-helper.php:182
-msgid "Website connected successfully."
-msgstr ""
-
-#: iwp-migration-helper.php:197
-msgid "Ready to start migration."
-msgstr ""
-
-#: iwp-migration-helper.php:206
+#: iwp-migration-helper.php:182, iwp-migration-helper.php:256
 msgid "Migration might be finished."
 msgstr ""
 
-#: iwp-migration-helper.php:222
-msgid "Connect"
+#: iwp-migration-helper.php:193, iwp-migration-helper.php:247
+msgid "Ready to start migration."
+msgstr ""
+
+#: iwp-migration-helper.php:208
+msgid "Migration endpoint is invalid."
+msgstr ""
+
+#: iwp-migration-helper.php:227
+msgid "Website could not connect successfully."
 msgstr ""
 
 #: iwp-migration-helper.php:238
+msgid "Something went wrong."
+msgstr ""
+
+#: iwp-migration-helper.php:272, iwp-migration-helper.php:325
+msgid "Connect"
+msgstr ""
+
+#: iwp-migration-helper.php:288
 msgid "Website is not connected."
 msgstr ""
 
-#: iwp-migration-helper.php:236
+#: iwp-migration-helper.php:286
 msgid "InstaWP Connect plugin not found."
 msgstr ""
 
-#: iwp-migration-helper.php:231
+#: iwp-migration-helper.php:281
 msgid "Website is connected."
 msgstr ""
 
-#: iwp-migration-helper.php:232
+#: iwp-migration-helper.php:282
 msgid "Start Migration"
 msgstr ""
 
-#: iwp-migration-helper.php:250
+#: iwp-migration-helper.php:300
 msgid "Your website will be connected with InstaWP and then you can initiate the migration from other website to this website."
 msgstr ""
 
-#: iwp-migration-helper.php:248
+#: iwp-migration-helper.php:298
 msgid "You are being redirected to the site migrator tool.."
 msgstr ""
 
-#: iwp-migration-helper.php:272
+#: iwp-migration-helper.php:322
 msgid "Copied."
 msgstr ""
 
-#: iwp-migration-helper.php:273
+#: iwp-migration-helper.php:323
 msgid "Transferring..."
 msgstr ""
 

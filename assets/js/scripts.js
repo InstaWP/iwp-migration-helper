@@ -11,13 +11,19 @@
             return;
         }
 
+        let postData = {
+            'action': 'instawp_connect_website',
+        };
+
+        if (el_connect_btn.hasClass('e2e-mig-wo-connects')) {
+            postData.e2e_mig_wo_connects = 1;
+        }
+
         $.ajax({
             type: 'POST',
             url: plugin_object.ajax_url,
             context: this,
-            data: {
-                'action': 'instawp_connect_website',
-            },
+            data: postData,
             beforeSend: function () {
                 el_connect_btn.addClass('doing-ajax');
             },
@@ -46,7 +52,7 @@
 
                     el_connect_btn.removeClass('doing-ajax');
                 } else {
-                    el_connect_btn.removeClass('doing-ajax').addClass('done');
+                    el_connect_btn.removeClass(['doing-ajax', 'loading']).addClass('done').html(plugin_object.connect_btn_name);
                 }
             },
             error: function () {

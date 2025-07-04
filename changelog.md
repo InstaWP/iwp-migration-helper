@@ -1,3 +1,6 @@
+v1.1.2
+======
+Added: Support end to end migration without connects  
 
 v1.1.1
 ======
