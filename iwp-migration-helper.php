@@ -11,6 +11,7 @@
 	License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
+use Google\Rpc\Help;
 use InstaWP\Connect\Helpers\Helper;
 use InstaWP\Connect\Helpers\Installer;
 
@@ -42,7 +43,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				Helper::set_api_domain( INSTAWP_API_DOMAIN );
 
 				self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
-				$this->redirect_url    = esc_url( sprintf( '%s/%s?d_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, Helper::get_connect_uuid() ) );
+				$this->redirect_url    = esc_url( sprintf( '%s/%s?g_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, Helper::get_mig_gid() ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 				add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 				add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
@@ -142,6 +143,13 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			}
 		}
 
+		/**
+		 * Is end to end migration without connects.
+		 */
+		function is_e2e_mig_wo_connects() {
+			return ! ( empty( $_POST['e2e_mig_wo_connects'] ) || ( defined( 'INSTAWP_AUTO_MIGRATION' ) && INSTAWP_AUTO_MIGRATION ) || ( defined( 'DEMO_SITE_URL' ) && ! empty( DEMO_SITE_URL ) ) || ! defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || empty( INSTAWP_MIGRATE_ENDPOINT ) || false !== strpos( INSTAWP_MIGRATE_ENDPOINT, 'slug' ) || ! empty( get_option( 'iwp_demo_site_url' ) ) );
+		}
+
 		function instawp_connect_website() {
 
 			if ( ! function_exists( 'get_plugins' ) || ! function_exists( 'get_mu_plugins' ) ) {
@@ -168,35 +176,72 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				);
 			}
 
-			// Connect the website with InstaWP server
-			if ( empty( Helper::get_api_key() ) ) {
-
-				$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ) );
-
-				if ( ! $connect_response ) {
-					wp_send_json_error(
-						array(
-							'message'  => __( 'Website could not connect successfully.', 'iwp-migration-helper' ),
-							'response' => $connect_response
-						)
-					);
-				}
-
-				wp_send_json_success(
+			if ( ! function_exists( 'instawp' ) ) {
+				wp_send_json_error(
 					array(
-						'message'  => __( 'Website connected successfully.', 'iwp-migration-helper' ),
-						'response' => $connect_response
+						'message'  => __( 'Migration might be finished.', 'iwp-migration-helper' ),
+						'response' => false
 					)
 				);
 			}
 
 			// Ready to start the migration
-			if ( function_exists( 'instawp' ) && ! empty( Helper::get_connect_id() ) ) {
+			if ( function_exists( 'instawp' ) && ! empty( Helper::get_connect_id() ) && ! empty( $demo_site_connect_uuid ) ) {
+				$this->redirect_url = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', Helper::get_api_domain(), admin_url() ) );
+				wp_send_json_success(
+					array(
+						'message'      => __( 'Ready to start migration.', 'iwp-migration-helper' ),
+						'response'     => true,
+						'redirect_url' => $this->redirect_url,
+					)
+				);
+			}
 
-				if ( ! empty( $demo_site_connect_uuid ) ) {
-					$this->redirect_url = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', Helper::get_api_domain(), admin_url() ) );
+			// End to end migration without connects
+			if ( $this->is_e2e_mig_wo_connects() ) {
+
+				// Get white label migration slug
+				$wlm_slug = trim( str_replace( 'migrate/', '', INSTAWP_MIGRATE_ENDPOINT ) );
+				if ( empty( $wlm_slug ) ) {
+					wp_send_json_error(
+						array(
+							'message'  => __( 'Migration endpoint is invalid.', 'iwp-migration-helper' ),
+							'response' => false
+						)
+					);
+				}
+				// Generate api key and make migration request
+				$connect_response = Helper::instawp_generate_api_key(
+					INSTAWP_API_KEY,
+					'',
+					array(
+						'e2e_mig_push_request' => true,
+						'wlm_slug'             => $wlm_slug,
+						'managed'              => false,
+					)
+				);
+
+				if ( ! $connect_response ) {
+					wp_send_json_error(
+						array(
+							'message'  => __( 'Website could not connect successfully.', 'iwp-migration-helper' ),
+							'response' => false
+						)
+					);
 				}
 
+				// Get migration group id
+				$group_uuid = Helper::get_mig_gid();
+				if ( empty( $group_uuid ) ) {
+					wp_send_json_error(
+						array(
+							'message'  => __( 'Something went wrong.', 'iwp-migration-helper' ),
+							'response' => false
+						)
+					);
+				}
+
+				$this->redirect_url = esc_url( sprintf( '%s/%s?g_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, $group_uuid ) );
 				wp_send_json_success(
 					array(
 						'message'      => __( 'Ready to start migration.', 'iwp-migration-helper' ),
@@ -257,7 +302,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			echo '<div class="mig-button-wrap">';
 			echo '<span class="mig-guide-text">' . $guide_message . '</span>';
-			echo '<span class="mig-button" data-redirect="' . $redirect_url . '">' . $btn_label . '</span>';
+			echo '<span class="mig-button e2e-mig-wo-connects" data-redirect="' . $redirect_url . '">' . $btn_label . '</span>';
 			echo '</div>';
 			echo '</div>';
 		}
@@ -277,6 +322,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				'copy_text'         => __( 'Copied.', 'iwp-migration-helper' ),
 				'text_transferring' => __( 'Transferring...', 'iwp-migration-helper' ),
 				'has_demo_url_box'  => ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX ),
+				'connect_btn_name'  => __( 'Connect', 'iwp-migration-helper' ),
 			);
 
 			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
