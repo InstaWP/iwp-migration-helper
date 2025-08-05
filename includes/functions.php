@@ -121,6 +121,22 @@ if ( ! function_exists( 'iwp_mig_helper_error_log' ) ) {
 	}
 }
 
+if ( ! function_exists( 'iwp_correct_api_key' ) ) {
+	/**
+	 * Get error log
+	 *
+	 * @return array
+	 */
+	function iwp_correct_api_key( $api_key ) {
+		if ( empty( $api_key ) || strpos( $api_key, '|' ) === false ) {
+			return $api_key;
+		}
+
+		$exploded             = explode( '|', $api_key );
+		return $exploded[1];
+	}
+}
+
 
 if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 	/**
@@ -151,13 +167,17 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 		}
 
 		$demo_site_args     = [ 'email' => Option::get_option( 'admin_email' ), 'demo_url' => $demo_url ];
-		$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, [], 'POST', 'v2', INSTAWP_API_KEY );
+		$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, [], 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
 
 		if ( isset( $demo_site_args_res['success'] ) && $demo_site_args_res['success'] !== true ) {
 
+			iwp_mig_helper_error_log( [
+				'message' => 'Error from the api sites/get-demo-site: ',
+				'demo_site_args' => $demo_site_args,
+				'demo_site_args_res' => $demo_site_args_res,
+				'iwp_demo_error_counter' => $iwp_demo_error_counter
+			] );
 			Option::update_option( 'iwp_demo_error_counter', $iwp_demo_error_counter + 1 );
-
-			error_log( 'Error from the api sites/get-demo-site: ' . Helper::get_args_option( 'message', $demo_site_args_res ) . ' Current error counter: ' . esc_html( $iwp_demo_error_counter ) );
 
 			return false;
 		}

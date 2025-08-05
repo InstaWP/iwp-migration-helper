@@ -67,9 +67,9 @@ class IWP_HOSTING_Ajax {
 	 */
 	function send_response( $response, $error = false ) {
 		if ( $error ) {
+			iwp_mig_helper_error_log( $response );
 			if ( ! $this->is_ajax ) {
 				delete_option( 'iwp_auto_bg_mig_initiated' );
-				iwp_mig_helper_error_log( $response );
 			}
 			wp_send_json_error( $response );
 		} else if ( ! $this->is_ajax ) {
@@ -141,7 +141,7 @@ class IWP_HOSTING_Ajax {
 		$install_connect_res  = Curl::do_curl( "sites/{$iwp_demo_site_id}/install-connect", $install_connect_args );
 
 		if ( isset( $install_connect_res['success'] ) && $install_connect_res['success'] !== true ) {
-			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $install_connect_res ) ], true );
+			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $install_connect_res ), 'details' => $install_connect_res ], true );
 		}
 
 		$install_connect_res_data   = Helper::get_args_option( 'data', $install_connect_res );
@@ -211,7 +211,7 @@ class IWP_HOSTING_Ajax {
 		$initiate_push_res  = Curl::do_curl( 'migrates-v3/push', $initiate_push_args );
 
 		if ( isset( $initiate_push_res['success'] ) && $initiate_push_res['success'] !== true ) {
-			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $initiate_push_res ) ], true );
+			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $initiate_push_res ),'details' => $initiate_push_res ], true );
 		}
 
 		$initiate_push_res_data   = Helper::get_args_option( 'data', $initiate_push_res );
@@ -221,7 +221,7 @@ class IWP_HOSTING_Ajax {
 		$iwp_migrate_tracking_url = Helper::get_args_option( 'tracking_url', $initiate_push_res_data );
 
 		if ( empty( $iwp_migrate_id ) || empty( $iwp_migrate_key ) || empty( $iwp_migrate_uuid ) || empty( $iwp_migrate_tracking_url ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Could not get proper data from migration initiation response.' ) ], true );
+			$this->send_response( [ 'message' => esc_html__( 'Could not get proper data from migration initiation response.' ), 'details' => $initiate_push_res ], true );
 		}
 
 		update_option( 'iwp_migrate_id', $iwp_migrate_id );
