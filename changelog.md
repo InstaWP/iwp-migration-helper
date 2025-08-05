@@ -1,3 +1,7 @@
+v1.1.3
+======
+Added: Support for the Migration API Token type
+
 v1.1.2
 ======
 Added: Support end to end migration without connects  
