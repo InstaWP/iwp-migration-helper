@@ -118,7 +118,7 @@ class IWP_HOSTING_Ajax {
 
 	function set_api_key() {
 		$this->check_nonce();
-		if ( ! empty( Helper::get_api_key() ) ) {
+		if ( ! empty( Helper::get_api_key() ) && ! empty( Helper::get_connect_id() ) ) {
 			$this->send_response( [ 'message' => esc_html__( 'Website is already connected.' ) ] );
 		}
 

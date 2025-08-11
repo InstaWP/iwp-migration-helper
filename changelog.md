@@ -1,3 +1,7 @@
+v1.1.4
+======
+Fixed: Already connected Website issue.
+
 v1.1.3
 ======
 Added: Support for the Migration API Token type
