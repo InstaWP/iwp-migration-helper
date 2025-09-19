@@ -188,13 +188,6 @@
                 el_iwp_text_content.html(response.data.message);
 
                 if (response.success) {
-                    return $.post(plugin_object.ajax_url, getPostData('iwp_connect_demo_site'));
-                }
-            })
-            .then(function (response) {
-                el_iwp_text_content.html(response.data.message);
-
-                if (response.success) {
                     return $.post(plugin_object.ajax_url, getPostData('iwp_initiate_migration'));
                 }
             })
