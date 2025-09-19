@@ -7,8 +7,8 @@ Author: InstaWP
 Text Domain: iwp-migration-helper-settings
 */
 
-if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
 }
 
 defined( 'INSTAWP_API_KEY' ) || define( 'INSTAWP_API_KEY', '<api key>' );
@@ -18,8 +18,13 @@ defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.in
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate/<slug>' );
 
 /**
- * To enable automatic migration upon plugin activation, 
- * define DEMO_SITE_URL and 
+ * To display the translation on the migration page in a specific language.
+ */
+// defined( 'INSTAWP_MIGRATE_LANGUAGE_SLUG' ) || define( 'INSTAWP_MIGRATE_LANGUAGE_SLUG', 'en' );
+
+/**
+ * To enable automatic migration upon plugin activation,
+ * define DEMO_SITE_URL and
  * set INSTAWP_AUTO_MIGRATION to true
  */
 // Demo site url

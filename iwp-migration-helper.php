@@ -1,15 +1,15 @@
 <?php
-/*
-	Plugin Name: InstaWP Migration Helper
-	Plugin URI: https://instawp.com/hosting-migration/
-	Description: Migration helper plugin for hosting providers.
-	Version: 1.1.4
-	Text Domain: iwp-migration-helper
-	Author: InstaWP Team
-	Author URI: https://instawp.com/
-	License: GPLv2 or later
-	License URI: http://www.gnu.org/licenses/gpl-2.0.html
-*/
+/**
+ * Plugin Name: InstaWP Migration Helper
+ * Plugin URI: https://instawp.com/hosting-migration/
+ * Description: Migration helper plugin for hosting providers.
+ * Version: 1.1.5
+ * Text Domain: iwp-migration-helper
+ * Author: InstaWP Team
+ * Author URI: https://instawp.com/
+ * License: GPLv2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 use InstaWP\Connect\Helpers\Helper;
 use InstaWP\Connect\Helpers\Installer;
@@ -18,14 +18,14 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.4' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.5' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 	class IWP_HOSTING_MIG_Main {
 
-		protected static $_instance = null;
-		protected static $_script_version = null;
+		protected static $_instance            = null;
+		protected static $_script_version      = null;
 		protected static $_connect_plugin_slug = 'instawp-connect';
 
 		private $redirect_url;
@@ -38,7 +38,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			if ( ! defined( 'INSTAWP_API_DOMAIN' ) || ! defined( 'INSTAWP_API_KEY' ) || ! defined( 'INSTAWP_MIGRATE_ENDPOINT' ) ) {
 				add_action( 'admin_notices', array( $this, 'notice_missing_required_settings' ) );
-			} else if ( iwp_cant_auto_bg_migration() ) {
+			} elseif ( iwp_cant_auto_bg_migration() ) {
 				Helper::set_api_domain( INSTAWP_API_DOMAIN );
 
 				self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
@@ -56,10 +56,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 		/**
 		 * Redirect to migration page.
-		 * 
-		 * @param $hook 
+		 *
+		 * @param $hook
 		 */
-		public function redirect_to_migration_page($hook) {
+		public function redirect_to_migration_page( $hook ) {
 			if ( 'plugins.php' === $hook && function_exists( 'is_admin' ) && is_admin() && function_exists( 'wp_redirect' ) ) {
 				$redirect_url = get_option( 'iwp_migrate_tracking_url' );
 				if ( ! empty( $redirect_url ) && filter_var( $redirect_url, FILTER_VALIDATE_URL ) ) {
@@ -162,7 +162,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 						'slug'     => 'instawp-connect',
 						'type'     => 'plugin',
 						'activate' => true,
-					)
+					),
 				);
 				$installer = new Installer( $params );
 				$response  = $installer->start();
@@ -170,7 +170,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				wp_send_json_success(
 					array(
 						'message'  => __( 'Plugin activated successfully.', 'iwp-migration-helper' ),
-						'response' => $response
+						'response' => $response,
 					)
 				);
 			}
@@ -179,7 +179,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				wp_send_json_error(
 					array(
 						'message'  => __( 'Migration might be finished.', 'iwp-migration-helper' ),
-						'response' => false
+						'response' => false,
 					)
 				);
 			}
@@ -205,7 +205,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					wp_send_json_error(
 						array(
 							'message'  => __( 'Migration endpoint is invalid.', 'iwp-migration-helper' ),
-							'response' => false
+							'response' => false,
 						)
 					);
 				}
@@ -224,7 +224,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					wp_send_json_error(
 						array(
 							'message'  => __( 'Website could not connect successfully.', 'iwp-migration-helper' ),
-							'response' => false
+							'response' => false,
 						)
 					);
 				}
@@ -235,7 +235,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					wp_send_json_error(
 						array(
 							'message'  => __( 'Something went wrong.', 'iwp-migration-helper' ),
-							'response' => false
+							'response' => false,
 						)
 					);
 				}
@@ -253,7 +253,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			wp_send_json_error(
 				array(
 					'message'  => __( 'Migration might be finished.', 'iwp-migration-helper' ),
-					'response' => false
+					'response' => false,
 				)
 			);
 		}
@@ -273,7 +273,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			$classes           = array(
 				'notice',
 				'notice-warning',
-				'iwp-hosting-mig-wrap'
+				'iwp-hosting-mig-wrap',
 			);
 
 			if ( ! empty( Helper::get_connect_id() ) ) {
@@ -317,7 +317,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			$localize_scripts = array(
 				'ajax_url'          => admin_url( 'admin-ajax.php' ),
-				'iwp_nonce'     	=> wp_create_nonce( 'iwp_mig_nonce' ),	
+				'iwp_nonce'         => wp_create_nonce( 'iwp_mig_nonce' ),
 				'copy_text'         => __( 'Copied.', 'iwp-migration-helper' ),
 				'text_transferring' => __( 'Transferring...', 'iwp-migration-helper' ),
 				'has_demo_url_box'  => ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX ),
@@ -332,7 +332,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			wp_enqueue_script( 'iwp-hosting-mig', plugins_url( '/assets/js/scripts.js', __FILE__ ), array( 'jquery' ), self::$_script_version );
 			wp_localize_script( 'iwp-hosting-mig', 'iwp_hosting_mig', $localize_scripts );
 
-			wp_enqueue_style( 'iwp-hosting-mig', IWP_HOSTING_MIG_PLUGIN_URL . 'assets/css/style.css', [], self::$_script_version );
+			wp_enqueue_style( 'iwp-hosting-mig', IWP_HOSTING_MIG_PLUGIN_URL . 'assets/css/style.css', array(), self::$_script_version );
 		}
 
 		public static function instance() {

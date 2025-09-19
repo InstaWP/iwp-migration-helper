@@ -39,6 +39,25 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 ```
 
 ## Changelog
+#### 1.1.5 - 19 Sep 2025
+- ADD - Support for translation slug.
+- UPDATE - Dependency packages
+
+#### 1.1.4 - 12 August 2025
+- FIX - Already connected website issue.
+
+#### 1.1.3 - 06 August 2025
+- ADD - Support for the Migration API Token type.
+
+#### 1.1.2 - 04 July 2025
+- ADD - Support for end-to-end migration without connects.
+
+#### 1.1.1 - 25 June 2025
+- ADD - Setting to input a custom demo site URL.
+- ADD - Support for site migration using dynamic demo site URL.
+
+#### 1.1.0 - 16 June 2025
+- ADD - Auto migration using demo site URL.
 
 #### 1.0.9 - 07 May 2025
 
