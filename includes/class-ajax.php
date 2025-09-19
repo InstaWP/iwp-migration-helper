@@ -23,7 +23,7 @@ class IWP_HOSTING_Ajax {
 		add_action( 'wp_ajax_iwp_connect_demo_site', array( $this, 'connect_demo_site' ) );
 		add_action( 'wp_ajax_iwp_initiate_migration', array( $this, 'initiate_migration' ) );
 		add_action( 'wp_ajax_iwp_reset_side_data', array( $this, 'reset_side_data' ) );
-		$this->is_ajax = function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax(): true;
+		$this->is_ajax = function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax() : true;
 	}
 
 	function reset_side_data() {
@@ -31,7 +31,7 @@ class IWP_HOSTING_Ajax {
 		$reset_nonce = isset( $_POST['reset_nonce'] ) ? sanitize_text_field( $_POST['reset_nonce'] ) : '';
 
 		if ( ! wp_verify_nonce( $reset_nonce, 'iwp_reset_plugin' ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ], true );
+			$this->send_response( array( 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ), true );
 		}
 
 		delete_option( 'iwp_demo_site_id' );
@@ -41,7 +41,7 @@ class IWP_HOSTING_Ajax {
 
 		iwp_get_demo_site_data();
 
-		$this->send_response( [ 'message' => esc_html__( 'Deleted demo site data successfully.' ) ] );
+		$this->send_response( array( 'message' => esc_html__( 'Deleted demo site data successfully.' ) ) );
 	}
 
 	// Check nonce
@@ -51,18 +51,18 @@ class IWP_HOSTING_Ajax {
 		}
 
 		$iwp_nonce = isset( $_POST['iwp_nonce'] ) ? sanitize_text_field( $_POST['iwp_nonce'] ) : '';
-		if ( empty( $iwp_nonce) || ! wp_verify_nonce( $iwp_nonce, 'iwp_mig_nonce' ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ], true );
+		if ( empty( $iwp_nonce ) || ! wp_verify_nonce( $iwp_nonce, 'iwp_mig_nonce' ) ) {
+			$this->send_response( array( 'message' => esc_html__( 'Nonce verification failed!', 'iwp-migration-helper' ) ), true );
 		}
 		return true;
 	}
 
 	/**
 	 * Send response
-	 * 
+	 *
 	 * @param array $response The response.
 	 * @param bool  $error   The error.
-	 * 
+	 *
 	 * @return array The response.
 	 */
 	function send_response( $response, $error = false ) {
@@ -72,8 +72,11 @@ class IWP_HOSTING_Ajax {
 				delete_option( 'iwp_auto_bg_mig_initiated' );
 			}
 			wp_send_json_error( $response );
-		} else if ( ! $this->is_ajax ) {
-			return array( 'response' => $response, 'success' => ! $error );
+		} elseif ( ! $this->is_ajax ) {
+			return array(
+				'response' => $response,
+				'success'  => ! $error,
+			);
 		}
 
 		wp_send_json_success( $response );
@@ -85,21 +88,26 @@ class IWP_HOSTING_Ajax {
 		}
 
 		if ( is_plugin_active( sprintf( '%1$s/%1$s.php', 'instawp-connect' ) ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Connect plugin is already installed and activated.' ) ] );
+			$this->send_response( array( 'message' => esc_html__( 'Connect plugin is already installed and activated.' ) ) );
 		}
 
 		$installer = new Installer(
-			[
-				[
+			array(
+				array(
 					'slug'     => 'instawp-connect',
 					'type'     => 'plugin',
 					'activate' => true,
-				]
-			]
+				),
+			)
 		);
 		$response  = $installer->start();
 
-		$this->send_response( [ 'message' => esc_html__( 'Plugin activated successfully.' ), 'response' => $response ] );
+		$this->send_response(
+			array(
+				'message'  => esc_html__( 'Plugin activated successfully.' ),
+				'response' => $response,
+			)
+		);
 	}
 
 	function set_site_data_and_install_plugin() {
@@ -119,29 +127,46 @@ class IWP_HOSTING_Ajax {
 	function set_api_key() {
 		$this->check_nonce();
 		if ( ! empty( Helper::get_api_key() ) && ! empty( Helper::get_connect_id() ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Website is already connected.' ) ] );
+			$this->send_response( array( 'message' => esc_html__( 'Website is already connected.' ) ) );
 		}
 
 		$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ) );
 
 		if ( ! $connect_response ) {
-			$this->send_response( [ 'message' => esc_html__( 'Website could not connect successfully.' ), 'response' => $connect_response ], true );
+			$this->send_response(
+				array(
+					'message'  => esc_html__( 'Website could not connect successfully.' ),
+					'response' => $connect_response,
+				),
+				true
+			);
 		}
 
-		$this->send_response( [ 'message' => esc_html__( 'Website connected successfully.' ), 'response' => $connect_response ] );
+		$this->send_response(
+			array(
+				'message'  => esc_html__( 'Website connected successfully.' ),
+				'response' => $connect_response,
+			)
+		);
 	}
 
 	function connect_demo_site() {
 		$this->check_nonce();
 		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Could not find the demo site details.' ) ], true );
+			$this->send_response( array( 'message' => esc_html__( 'Could not find the demo site details.' ) ), true );
 		}
 
-		$install_connect_args = [ 'destination_connect_id' => Helper::get_connect_id() ];
+		$install_connect_args = array( 'destination_connect_id' => Helper::get_connect_id() );
 		$install_connect_res  = Curl::do_curl( "sites/{$iwp_demo_site_id}/install-connect", $install_connect_args );
 
 		if ( isset( $install_connect_res['success'] ) && $install_connect_res['success'] !== true ) {
-			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $install_connect_res ), 'details' => $install_connect_res ], true );
+			$this->send_response(
+				array(
+					'message' => Helper::get_args_option( 'message', $install_connect_res ),
+					'details' => $install_connect_res,
+				),
+				true
+			);
 		}
 
 		$install_connect_res_data   = Helper::get_args_option( 'data', $install_connect_res );
@@ -149,23 +174,29 @@ class IWP_HOSTING_Ajax {
 		$iwp_demo_site_connect_uuid = Helper::get_args_option( 'connect_uuid', $install_connect_res_data );
 
 		if ( empty( $iwp_demo_site_connect_id ) || empty( $iwp_demo_site_connect_uuid ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Could not get proper response from connect install on the demo site.' ), 'response' => $install_connect_res ], true );
+			$this->send_response(
+				array(
+					'message'  => esc_html__( 'Could not get proper response from connect install on the demo site.' ),
+					'response' => $install_connect_res,
+				),
+				true
+			);
 		}
 
 		update_option( 'iwp_demo_site_connect_id', $iwp_demo_site_connect_id );
 		update_option( 'iwp_demo_site_connect_uuid', $iwp_demo_site_connect_uuid );
 
-		$this->send_response( [ 'message' => esc_html__( 'Demo website is connected successfully.' ) ] );
+		$this->send_response( array( 'message' => esc_html__( 'Demo website is connected successfully.' ) ) );
 	}
 
 	function initiate_migration() {
 		$this->check_nonce();
 		if ( ! function_exists( 'instawp' ) || empty( Helper::get_connect_id() ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Website was not connected successfully.' ) ], true );
+			$this->send_response( array( 'message' => esc_html__( 'Website was not connected successfully.' ) ), true );
 		}
 
 		if ( empty( $iwp_demo_site_connect_id = Option::get_option( 'iwp_demo_site_connect_id', '' ) ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Could not find demo site details.' ) ], true );
+			$this->send_response( array( 'message' => esc_html__( 'Could not find demo site details.' ) ), true );
 		}
 
 		global $wp_version, $current_user;
@@ -190,13 +221,13 @@ class IWP_HOSTING_Ajax {
 			'user_details'   => array(
 				'data'  => $current_user_data,
 				'caps'  => $current_user->caps,
-				'roles' => $current_user->roles
+				'roles' => $current_user->roles,
 			),
 		);
 		$migrate_settings   = InstaWP_Tools::get_migrate_settings( array(), $extra_settings );
 		$api_signature      = hash( 'sha512', $migrate_key . wp_generate_uuid4() );
 		$dest_file_url      = InstaWP_Tools::generate_destination_file( $migrate_key, $api_signature, $migrate_settings );
-		$initiate_push_args = [
+		$initiate_push_args = array(
 			'source_connect_id'  => $iwp_demo_site_connect_id,
 			'php_version'        => PHP_VERSION,
 			'wp_version'         => $wp_version,
@@ -207,11 +238,17 @@ class IWP_HOSTING_Ajax {
 			'dest_url'           => $dest_file_url,
 			'api_signature'      => $api_signature,
 			'iwp_auto_migration' => true,
-		];
+		);
 		$initiate_push_res  = Curl::do_curl( 'migrates-v3/push', $initiate_push_args );
 
 		if ( isset( $initiate_push_res['success'] ) && $initiate_push_res['success'] !== true ) {
-			$this->send_response( [ 'message' => Helper::get_args_option( 'message', $initiate_push_res ),'details' => $initiate_push_res ], true );
+			$this->send_response(
+				array(
+					'message' => Helper::get_args_option( 'message', $initiate_push_res ),
+					'details' => $initiate_push_res,
+				),
+				true
+			);
 		}
 
 		$initiate_push_res_data   = Helper::get_args_option( 'data', $initiate_push_res );
@@ -221,7 +258,22 @@ class IWP_HOSTING_Ajax {
 		$iwp_migrate_tracking_url = Helper::get_args_option( 'tracking_url', $initiate_push_res_data );
 
 		if ( empty( $iwp_migrate_id ) || empty( $iwp_migrate_key ) || empty( $iwp_migrate_uuid ) || empty( $iwp_migrate_tracking_url ) ) {
-			$this->send_response( [ 'message' => esc_html__( 'Could not get proper data from migration initiation response.' ), 'details' => $initiate_push_res ], true );
+			$this->send_response(
+				array(
+					'message' => esc_html__( 'Could not get proper data from migration initiation response.' ),
+					'details' => $initiate_push_res,
+				),
+				true
+			);
+		}
+
+		if ( defined( 'INSTAWP_MIGRATE_LANGUAGE_SLUG' ) && ! empty( INSTAWP_MIGRATE_LANGUAGE_SLUG ) ) {
+			$iwp_migrate_tracking_url = add_query_arg(
+				array(
+					'locale' => INSTAWP_MIGRATE_LANGUAGE_SLUG,
+				),
+				$iwp_migrate_tracking_url
+			);
 		}
 
 		update_option( 'iwp_migrate_id', $iwp_migrate_id );
@@ -229,7 +281,12 @@ class IWP_HOSTING_Ajax {
 		update_option( 'iwp_migrate_uuid', $iwp_migrate_uuid );
 		update_option( 'iwp_migrate_tracking_url', $iwp_migrate_tracking_url );
 
-		$this->send_response( [ 'message' => esc_html__( 'Migration initiated successfully. You are going to be redirected to the tracking page.' ), 'iwp_migrate_tracking_url' => $iwp_migrate_tracking_url ] );
+		$this->send_response(
+			array(
+				'message'                  => esc_html__( 'Migration initiated successfully. You are going to be redirected to the tracking page.' ),
+				'iwp_migrate_tracking_url' => $iwp_migrate_tracking_url,
+			)
+		);
 	}
 }
 
