@@ -20,6 +20,30 @@ defined( 'INSTAWP_API_DOMAIN' ) || define( 'INSTAWP_API_DOMAIN', 'https://app.in
 defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'migrate/<slug>' );
 ```
 
+## WP_CLI commands
+
+### Migrate Demo Site
+```bash 
+wp instawp-migration-helper init --instawp_api_key=<api-key>
+```
+
+#### OPTIONS
+`--instawp_api_key=<key>`
+Your Instawp API key used to authenticate requests.
+
+`--instawp_api_domain=<url>`: The base URL of the Instawp API.
+
+`--instawp_migrate_endpoint=<endpoint>`: Endpoint path used for site migration, e.g., `migrate/<slug>`.
+
+`--instawp_migrate_language_slug=<slug>`: Language slug used to display the migration progress page in a specific language.
+
+`--demo_site_url=<url>`: URL of the demo site from which data will be fetched.
+
+`--instawp_migrate_email_check_off`: Set this flag to disable the admin email check when fetching demo site details.
+
+`--admin_email=<email>`: Admin email of the demo site.
+		 
+
 ## Walkthrough
 
 https://www.youtube.com/watch?v=8yY1UBSas0M
@@ -35,10 +59,15 @@ To enable auto migration please set this constant as true `define( 'INSTAWP_AUTO
 To customize the texts, colors and to apply any custom css please use the following constant.
 
 ```
-define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.","text_desc":"Transfer or Migrate the site here?","transfer_btn_text":"Transfer Site","transfer_btn_style":"background: #11BF85; border-color: #11BF85; color: #fff;","transfer_btn_style_hover":"background: #14855f; border-color: #14855f;","custom_css":".iwp-auto-migration h3.iwp-text-header > span { color: #14855f; }"}' );
+define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{demo_site_url}</span> which you used to create a demo site at {demo_created_at}.","text_desc":"Transfer or Migrate the site here?","transfer_btn_text":"Transfer Site","transfer_btn_style":"background#11BF85; border-color#11BF85; color#fff;","transfer_btn_style_hover":"background#14855f; border-color#14855f;","custom_css":".iwp-auto-migration h3.iwp-text-header > span { color#14855f; }"}' );
 ```
 
 ## Changelog
+#### 1.1.6 - 24 Sep 2025
+- ADD - WP CLI command to initiate migration.
+- Add - Setting to hide the migration section
+- ENHANCED - Error Logging
+
 #### 1.1.5 - 19 Sep 2025
 - ADD - Support for translation slug.
 - UPDATE - Dependency packages

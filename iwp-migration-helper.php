@@ -3,7 +3,7 @@
  * Plugin Name: InstaWP Migration Helper
  * Plugin URI: https://instawp.com/hosting-migration/
  * Description: Migration helper plugin for hosting providers.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Text Domain: iwp-migration-helper
  * Author: InstaWP Team
  * Author URI: https://instawp.com/
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.5' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.6' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -316,12 +316,14 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		function admin_scripts() {
 
 			$localize_scripts = array(
-				'ajax_url'          => admin_url( 'admin-ajax.php' ),
-				'iwp_nonce'         => wp_create_nonce( 'iwp_mig_nonce' ),
-				'copy_text'         => __( 'Copied.', 'iwp-migration-helper' ),
-				'text_transferring' => __( 'Transferring...', 'iwp-migration-helper' ),
-				'has_demo_url_box'  => ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX ),
-				'connect_btn_name'  => __( 'Connect', 'iwp-migration-helper' ),
+				'ajax_url'               => admin_url( 'admin-ajax.php' ),
+				'iwp_nonce'              => wp_create_nonce( 'iwp_mig_nonce' ),
+				'copy_text'              => __( 'Copied.', 'iwp-migration-helper' ),
+				'text_transferring'      => __( 'Preparing...', 'iwp-migration-helper' ),
+				'has_demo_url_box'       => ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX ),
+				'connect_btn_name'       => __( 'Connect', 'iwp-migration-helper' ),
+				'demo_site_url_required' => __( 'Demo site url is required', 'iwp-migration-helper' ),
+				'transfer_site'          => __( 'Transfer Site', 'iwp-migration-helper' ),
 			);
 
 			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
@@ -350,14 +352,15 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 }
 
 require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/class-ajax.php';
-
-add_action( 'plugin_loaded', array( 'IWP_HOSTING_MIG_Main', 'instance' ) );
+foreach ( array(
+	'functions',
+	'class-ajax',
+	'class-demo-mig',
+) as $file_name ) {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/' . $file_name . '.php';
+}
 
 // Plugin activation
-register_activation_hook( __FILE__, 'iwp_migration_helper_plugin_activated' );
-function iwp_migration_helper_plugin_activated() {
-	// Check for auto migration
-	iwp_mig_helper_auto_bg_migration();
-}
+register_activation_hook( __FILE__, 'iwp_mig_helper_auto_bg_migration' );
+// plugin loaded
+add_action( 'plugin_loaded', array( 'IWP_HOSTING_MIG_Main', 'instance' ) );

@@ -22,6 +22,14 @@ defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'mi
  */
 // defined( 'INSTAWP_MIGRATE_LANGUAGE_SLUG' ) || define( 'INSTAWP_MIGRATE_LANGUAGE_SLUG', 'en' );
 
+
+/**
+ * To Hide the migrate section if demo site data is not available.
+ *
+ * set INSTAWP_MIGRATE_HIDE_SECTION & INSTAWP_AUTO_MIGRATION to true
+ */
+// defined( 'INSTAWP_MIGRATE_HIDE_SECTION' ) || define( 'INSTAWP_MIGRATE_HIDE_SECTION', true );
+
 /**
  * To enable automatic migration upon plugin activation,
  * define DEMO_SITE_URL and
@@ -29,6 +37,12 @@ defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'mi
  */
 // Demo site url
 // defined( 'DEMO_SITE_URL' ) || define( 'DEMO_SITE_URL', '<demo site url>' );
+
+
+/**
+ * To not check admin_email to fetch site data
+ */
+// defined( 'INSTAWP_MIGRATE_EMAIL_CHECK_OFF' ) || define( 'INSTAWP_MIGRATE_EMAIL_CHECK_OFF', true );
 
 /**
  * To enable DEMO_SITE_URL input box in auto migration option,
