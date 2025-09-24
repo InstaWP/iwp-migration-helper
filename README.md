@@ -24,7 +24,7 @@ defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || define( 'INSTAWP_MIGRATE_ENDPOINT', 'mi
 
 ### Migrate Demo Site
 ```bash 
-wp instawp-migration-helper init --instawp_api_key=PbROuGNC3sPhfXcn4pEofHTCFS1BbfVVoLggeFVY
+wp instawp-migration-helper init --instawp_api_key=<api-key>
 ```
 
 #### OPTIONS
