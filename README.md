@@ -28,26 +28,20 @@ wp instawp-migration-helper init --instawp_api_key=<api-key>
 ```
 
 #### OPTIONS
-**--instawp_api_key=<key>**
+`--instawp_api_key=<key>`
 Your Instawp API key used to authenticate requests.
 
-**--instawp_api_domain=<url>**
-The base URL of the Instawp API.
+`--instawp_api_domain=<url>`: The base URL of the Instawp API.
 
-**--instawp_migrate_endpoint=<endpoint>**
-Endpoint path used for site migration, e.g., "migrate/<slug>".
+`--instawp_migrate_endpoint=<endpoint>`: Endpoint path used for site migration, e.g., "migrate/<slug>".
 
-**--instawp_migrate_language_slug=<slug>**
-Language slug used to display the migration progress page in a specific language.
+`--instawp_migrate_language_slug=<slug>`: Language slug used to display the migration progress page in a specific language.
 
-**--demo_site_url=<url>**
-URL of the demo site from which data will be fetched.
+`--demo_site_url=<url>`: URL of the demo site from which data will be fetched.
 
-**--instawp_migrate_email_check_off**
-Set this flag to disable the admin email check when fetching demo site details.
+`--instawp_migrate_email_check_off`: Set this flag to disable the admin email check when fetching demo site details.
 
-**--admin_email=<email>**
-Admin email of the demo site.
+`--admin_email=<email>`: Admin email of the demo site.
 		 
 
 ## Walkthrough
