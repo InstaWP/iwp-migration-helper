@@ -77,7 +77,7 @@ if ( ! class_exists( 'IWP_Demo_Migration_Helper' ) ) {
 			}
 
 			if ( ! defined( 'INSTAWP_API_DOMAIN' ) ) {
-				define( 'INSTAWP_API_DOMAIN', 'https://instawp.test' );
+				define( 'INSTAWP_API_DOMAIN', 'https://app.instawp.io' );
 			}
 
 			$this->prepare();
