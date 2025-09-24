@@ -33,7 +33,7 @@ Your Instawp API key used to authenticate requests.
 
 `--instawp_api_domain=<url>`: The base URL of the Instawp API.
 
-`--instawp_migrate_endpoint=<endpoint>`: Endpoint path used for site migration, e.g., "migrate/<slug>".
+`--instawp_migrate_endpoint=<endpoint>`: Endpoint path used for site migration, e.g., `migrate/<slug>`.
 
 `--instawp_migrate_language_slug=<slug>`: Language slug used to display the migration progress page in a specific language.
 
