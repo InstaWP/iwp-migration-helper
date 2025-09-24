@@ -61,6 +61,20 @@
         });
     }
 
+    function displayMessage(el, el_transfer_btn, message, hasError = true) {
+        if (!message) {
+            return false;
+        }
+        if (hasError) {
+            el.addClass('error-msg');
+            el_transfer_btn.removeClass('loading');
+            el_transfer_btn.find('span').html(plugin_object.transfer_site);
+        } else {
+            el.removeClass('error-msg');
+        }
+        el.text(message);
+    }
+
     // Get https url
     function getHttpsUrl(url) {
         if (!url) {
@@ -82,6 +96,18 @@
             action: action,
             iwp_nonce: plugin_object.iwp_nonce,
         };
+    }
+
+    // Helper function to post and handle errors
+    function postStep(actionData, el_msg, el_transfer_btn) {
+        return $.post(plugin_object.ajax_url, actionData)
+            .then(function (response) {
+                displayMessage(el_msg, el_transfer_btn, response?.data?.message, !response.success);
+                if (!response.success) {
+                    throw response; // stops the chain
+                }
+                return response;
+            });
     }
 
     $(document).on('ready', function () {
@@ -158,57 +184,42 @@
 
         let el_transfer_btn = $(this),
             el_input = $('#iwp-demo-site-url-input'),
+            el_admin_email = $('#iwp-demo-site-email-input'),
             el_transfer_btn_text = el_transfer_btn.find('span'),
             el_auto_migration_wrap = el_transfer_btn.parent(),
-            el_iwp_text_content = el_auto_migration_wrap.find('.iwp-text-content');
+            el_msg = $('#iwp-mig-res-message');
 
         if (el_transfer_btn.hasClass('loading')) {
             return;
         }
 
-        el_transfer_btn.addClass('loading');
         el_transfer_btn_text.html(plugin_object.text_transferring);
         const postData = getPostData('iwp_set_data_install_plugin');
         if (plugin_object.has_demo_url_box) {
             if (!el_input || !el_input.val()) {
-                console.log('Please enter demo site url.');
+                displayMessage(el_msg, el_transfer_btn, plugin_object.demo_site_url_required, true);
                 return false;
             }
             postData.demo_site_url = getHttpsUrl(el_input.val());
+            postData.admin_email = el_admin_email.val();
         }
-        $.post(plugin_object.ajax_url, postData)
-            .then(function (response) {
-                el_iwp_text_content.html(response.data.message);
 
-                if (response.success) {
-                    return $.post(plugin_object.ajax_url, getPostData('iwp_set_api_key'));
-                }
-            })
+        el_transfer_btn.addClass('loading');
+        postStep(postData, el_msg, el_transfer_btn)
+            .then(() => postStep(getPostData('iwp_set_api_key'), el_msg, el_transfer_btn))
+            .then(() => postStep(getPostData('iwp_connect_demo_site'), el_msg, el_transfer_btn))
+            .then(() => postStep(getPostData('iwp_initiate_migration'), el_msg, el_transfer_btn))
             .then(function (response) {
-                el_iwp_text_content.html(response.data.message);
-
-                if (response.success) {
-                    return $.post(plugin_object.ajax_url, getPostData('iwp_connect_demo_site'));
-                }
-            })
-            .then(function (response) {
-                el_iwp_text_content.html(response.data.message);
-
-                if (response.success) {
-                    return $.post(plugin_object.ajax_url, getPostData('iwp_initiate_migration'));
-                }
-            })
-            .then(function (response) {
-                el_iwp_text_content.html(response.data.message);
-
-                if (typeof response.data.iwp_migrate_tracking_url !== 'undefined') {
+                displayMessage(el_msg, el_transfer_btn, response?.data?.message, !response.success);
+                if (response.data?.iwp_migrate_tracking_url) {
                     setTimeout(function () {
                         window.location.href = response.data.iwp_migrate_tracking_url;
                     }, 1500);
                 }
             })
             .fail(function (error) {
-                console.log('Error:', error);
+                displayMessage(el_msg, el_transfer_btn, error?.data?.message || error.responseText || 'An error occurred.', true);
+                console.error('Error:', error);
             });
     });
 
