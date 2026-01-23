@@ -207,7 +207,7 @@
         el_transfer_btn.addClass('loading');
         postStep(postData, el_msg, el_transfer_btn)
             .then(() => postStep(getPostData('iwp_set_api_key'), el_msg, el_transfer_btn))
-            .then(() => postStep(getPostData('iwp_connect_demo_site'), el_msg, el_transfer_btn))
+            // .then(() => postStep(getPostData('iwp_connect_demo_site'), el_msg, el_transfer_btn))
             .then(() => postStep(getPostData('iwp_initiate_migration'), el_msg, el_transfer_btn))
             .then(function (response) {
                 displayMessage(el_msg, el_transfer_btn, response?.data?.message, !response.success);
