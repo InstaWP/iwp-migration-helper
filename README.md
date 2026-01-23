@@ -63,6 +63,9 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 ```
 
 ## Changelog
+#### 1.1.7 - 23 Jan 2026
+- UPDATE - Dependency packages
+
 #### 1.1.6 - 24 Sep 2025
 - ADD - WP CLI command to initiate migration.
 - Add - Setting to hide the migration section
