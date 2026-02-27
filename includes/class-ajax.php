@@ -193,12 +193,12 @@ class IWP_HOSTING_Ajax {
 
 	function initiate_migration() {
 		$this->check_nonce();
-		if ( ! function_exists( 'instawp' ) || empty( Helper::get_connect_id() ) ) {
-			return $this->send_response( array( 'message' => esc_html__( 'Website was not connected successfully.' ) ), true );
+		if ( ! function_exists( 'instawp' ) ) {
+			return $this->send_response( array( 'message' => esc_html__( 'Please install InstaWP Connect plugin first.' ) ), true );
 		}
 
-		if ( empty( $iwp_demo_site_connect_id = Option::get_option( 'iwp_demo_site_connect_id', '' ) ) ) {
-			return $this->send_response( array( 'message' => esc_html__( 'Could not find demo site details.' ) ), true );
+		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
+			return $this->send_response( array( 'message' => esc_html__( 'Could not find the demo site details.' ) ), true );
 		}
 
 		global $wp_version, $current_user;
@@ -238,7 +238,8 @@ class IWP_HOSTING_Ajax {
 
 		$initiate_push_args = Helper::get_connect_config(
 			array(
-				'source_connect_id'  => $iwp_demo_site_connect_id,
+				'source_site_id'  	 => $iwp_demo_site_id,
+				'wp_admin_email'	 => function_exists( 'get_bloginfo' ) ? get_bloginfo( 'admin_email' ) : Option::get_option( 'admin_email' ),
 				'php_version'        => PHP_VERSION,
 				'wp_version'         => $wp_version,
 				'plugin_version'     => INSTAWP_PLUGIN_VERSION,
