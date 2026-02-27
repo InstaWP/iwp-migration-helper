@@ -168,7 +168,7 @@ if ( ! class_exists( 'IWP_Demo_Migration_Helper' ) ) {
 					! $this->run_step( fn() => iwp_get_demo_site_data( $demo_url, $this->admin_email ) ) ||
 					! $this->run_step( fn() => $iwp_ajax->install_plugin() ) ||
 					! $this->run_step( fn() => $iwp_ajax->set_api_key() ) ||
-					! $this->run_step( fn() => $iwp_ajax->connect_demo_site() ) ||
+					//! $this->run_step( fn() => $iwp_ajax->connect_demo_site() ) ||
 					! $this->run_step( fn() => $iwp_ajax->initiate_migration() )
 				) {
 					return false;

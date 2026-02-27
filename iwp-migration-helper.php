@@ -3,7 +3,7 @@
  * Plugin Name: InstaWP Migration Helper
  * Plugin URI: https://instawp.com/hosting-migration/
  * Description: Migration helper plugin for hosting providers.
- * Version: 1.1.7
+ * Version: 1.1.8
  * Text Domain: iwp-migration-helper
  * Author: InstaWP Team
  * Author URI: https://instawp.com/
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.7' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.8' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -185,7 +185,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			}
 
 			// Ready to start the migration
-			if ( function_exists( 'instawp' ) && ! empty( Helper::get_connect_id() ) && ! empty( $demo_site_connect_uuid ) ) {
+			if ( function_exists( 'instawp' ) ) {
 				$this->redirect_url = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', Helper::get_api_domain(), admin_url() ) );
 				wp_send_json_success(
 					array(
@@ -276,15 +276,8 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				'iwp-hosting-mig-wrap',
 			);
 
-			if ( ! empty( Helper::get_connect_id() ) ) {
-				$guide_message = __( 'Website is connected.', 'iwp-migration-helper' );
-				$btn_label     = __( 'Start Migration', 'iwp-migration-helper' );
-				$classes[]     = 'connected';
-				$redirect_url  = $this->redirect_url;
-			} elseif ( ! function_exists( 'instawp' ) ) {
+			if ( ! function_exists( 'instawp' ) ) {
 				$guide_message = __( 'InstaWP Connect plugin not found.', 'iwp-migration-helper' );
-			} else {
-				$guide_message = __( 'Website is not connected.', 'iwp-migration-helper' );
 			}
 
 			if ( $auto_activate_mig ) {

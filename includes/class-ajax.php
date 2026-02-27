@@ -20,7 +20,7 @@ class IWP_HOSTING_Ajax {
 	function __construct() {
 		add_action( 'wp_ajax_iwp_set_data_install_plugin', array( $this, 'set_site_data_and_install_plugin' ) );
 		add_action( 'wp_ajax_iwp_set_api_key', array( $this, 'set_api_key' ) );
-		add_action( 'wp_ajax_iwp_connect_demo_site', array( $this, 'connect_demo_site' ) );
+		// add_action( 'wp_ajax_iwp_connect_demo_site', array( $this, 'connect_demo_site' ) );
 		add_action( 'wp_ajax_iwp_initiate_migration', array( $this, 'initiate_migration' ) );
 		add_action( 'wp_ajax_iwp_reset_side_data', array( $this, 'reset_side_data' ) );
 		$this->is_ajax = function_exists( 'wp_doing_ajax' ) ? wp_doing_ajax() : true;
@@ -128,11 +128,11 @@ class IWP_HOSTING_Ajax {
 
 	function set_api_key() {
 		$this->check_nonce();
-		if ( ! empty( Helper::get_api_key() ) && ! empty( Helper::get_connect_id() ) ) {
+		if ( ! empty( Helper::get_api_key() ) ) {
 			return $this->send_response( array( 'message' => esc_html__( 'Website is already connected.' ) ) );
 		}
 
-		$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ) );
+		$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ), '', array( 'without_connect' => true ) );
 
 		if ( ! $connect_response ) {
 			return $this->send_response(
@@ -193,12 +193,12 @@ class IWP_HOSTING_Ajax {
 
 	function initiate_migration() {
 		$this->check_nonce();
-		if ( ! function_exists( 'instawp' ) || empty( Helper::get_connect_id() ) ) {
-			return $this->send_response( array( 'message' => esc_html__( 'Website was not connected successfully.' ) ), true );
+		if ( ! function_exists( 'instawp' ) ) {
+			return $this->send_response( array( 'message' => esc_html__( 'Please install InstaWP Connect plugin first.' ) ), true );
 		}
 
-		if ( empty( $iwp_demo_site_connect_id = Option::get_option( 'iwp_demo_site_connect_id', '' ) ) ) {
-			return $this->send_response( array( 'message' => esc_html__( 'Could not find demo site details.' ) ), true );
+		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
+			return $this->send_response( array( 'message' => esc_html__( 'Could not find the demo site details.' ) ), true );
 		}
 
 		global $wp_version, $current_user;
@@ -236,19 +236,24 @@ class IWP_HOSTING_Ajax {
 
 		$dest_file_url = $dest_file_url['dest_url'];
 
-		$initiate_push_args = array(
-			'source_connect_id'  => $iwp_demo_site_connect_id,
-			'php_version'        => PHP_VERSION,
-			'wp_version'         => $wp_version,
-			'plugin_version'     => INSTAWP_PLUGIN_VERSION,
-			'active_plugins'     => Option::get_option( 'active_plugins' ),
-			'migrate_settings'   => $migrate_settings,
-			'migrate_key'        => $migrate_key,
-			'dest_url'           => $dest_file_url,
-			'api_signature'      => $api_signature,
-			'iwp_auto_migration' => true,
+		$initiate_push_args = Helper::get_connect_config(
+			array(
+				'source_site_id'  	 => $iwp_demo_site_id,
+				'wp_admin_email'	 => function_exists( 'get_bloginfo' ) ? get_bloginfo( 'admin_email' ) : Option::get_option( 'admin_email' ),
+				'php_version'        => PHP_VERSION,
+				'wp_version'         => $wp_version,
+				'plugin_version'     => INSTAWP_PLUGIN_VERSION,
+				'active_plugins'     => Option::get_option( 'active_plugins' ),
+				'migrate_settings'   => $migrate_settings,
+				'migrate_key'        => $migrate_key,
+				'dest_url'           => $dest_file_url,
+				'api_signature'      => $api_signature,
+				'iwp_auto_migration' => true,
+				'managed'            => false,
+				'mig_wo_connects'    => true,
+			)
 		);
-		$initiate_push_res  = Curl::do_curl( 'migrates-v3/push', $initiate_push_args );
+		$initiate_push_res  = Curl::do_curl( 'migrates-v3/push-only', $initiate_push_args );
 
 		if ( isset( $initiate_push_res['success'] ) && $initiate_push_res['success'] !== true ) {
 			return $this->send_response(

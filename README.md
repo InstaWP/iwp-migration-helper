@@ -63,13 +63,18 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 ```
 
 ## Changelog
+
+#### 1.1.8 - Beta
+- ENHANCE - Demo migration no longer creates InstaWP Connect connections.
+
 #### 1.1.7 - 23 Jan 2026
 - UPDATE - Dependency packages
 
 #### 1.1.6 - 24 Sep 2025
 - ADD - WP CLI command to initiate migration.
-- Add - Setting to hide the migration section
-- ENHANCED - Error Logging
+- ADD - Setting to hide the migration section
+- ADD - Setting for demo site admin email
+- ENHANCE - Error Logging
 
 #### 1.1.5 - 19 Sep 2025
 - ADD - Support for translation slug.
