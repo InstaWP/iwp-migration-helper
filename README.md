@@ -64,7 +64,7 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
-#### 1.1.8 - Beta
+#### 1.1.8 - 09 March 2026
 - ENHANCE - Demo migration no longer creates InstaWP Connect connections.
 
 #### 1.1.7 - 23 Jan 2026
