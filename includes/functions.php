@@ -144,6 +144,68 @@ if ( ! function_exists( 'iwp_correct_api_key' ) ) {
 }
 
 
+if ( ! function_exists( 'iwp_resolve_migration_engine' ) ) {
+	/**
+	 * Resolve the active migration engine ('v3' | 'v4') and persist it.
+	 *
+	 * A migration is a one-time process, so once resolved the engine never changes for this site —
+	 * we store it in the options table (`iwp_migration_engine`) and reuse it across the three
+	 * sequential steps (install plugin → set api key → initiate) instead of hitting the API each
+	 * time. A failed lookup is NOT persisted and falls back to 'v3' (the legacy flow) so behaviour
+	 * is unchanged when the engine endpoint is unreachable; a later step can still resolve it.
+	 *
+	 * @return string 'v3' or 'v4'
+	 */
+	function iwp_resolve_migration_engine() {
+
+		$stored = get_option( 'iwp_migration_engine' );
+		if ( ! empty( $stored ) && in_array( $stored, array( 'v3', 'v4' ), true ) ) {
+			return $stored;
+		}
+
+		if ( ! defined( 'INSTAWP_API_KEY' ) || empty( INSTAWP_API_KEY ) ) {
+			return 'v3';
+		}
+
+		// This resolver drives the plugin's push-only flow — tell client-app which flow asked.
+		$engine = Helper::getMigrationEngine( iwp_correct_api_key( INSTAWP_API_KEY ), 'push' );
+
+		if ( empty( $engine['success'] ) || empty( $engine['data']['engine'] ) || ! in_array( $engine['data']['engine'], array( 'v3', 'v4' ), true ) ) {
+			// Don't persist a failed/unknown lookup — keep legacy flow and allow a later retry.
+			return 'v3';
+		}
+
+		update_option( 'iwp_migration_engine', $engine['data']['engine'] );
+
+		return $engine['data']['engine'];
+	}
+}
+
+if ( ! function_exists( 'iwp_migration_wlm_slug' ) ) {
+	/**
+	 * Derive the white-label migration slug from INSTAWP_MIGRATE_ENDPOINT (e.g. "migrate/<slug>").
+	 *
+	 * Returns '' when unset or still the literal "<slug>" placeholder from the default settings —
+	 * the v4 push-mig endpoint is white-label bound, so callers must treat an empty slug as a
+	 * misconfiguration.
+	 *
+	 * @return string
+	 */
+	function iwp_migration_wlm_slug() {
+		if ( ! defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || empty( INSTAWP_MIGRATE_ENDPOINT ) ) {
+			return '';
+		}
+
+		$slug = trim( str_replace( 'migrate/', '', INSTAWP_MIGRATE_ENDPOINT ) );
+
+		if ( empty( $slug ) || false !== strpos( $slug, '<slug>' ) || 'slug' === $slug ) {
+			return '';
+		}
+
+		return $slug;
+	}
+}
+
 if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 	/**
 	 * Update demo site data

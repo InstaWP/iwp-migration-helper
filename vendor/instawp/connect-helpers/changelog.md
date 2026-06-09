@@ -1,3 +1,25 @@
+v1.1.2
+======
+- Added: Migration engine detection (v3/v4) via `getMigrationEngine()`.
+- Added: Unified `instaMigrateRequest()` that auto-routes to the v3 (InstaWP Connect) or v4 (InstaMigrate + AI agent) flow.
+- Added: InstaMigrate plugin install helper and API key retrieval.
+- Added: Migration URL and group id getters/setters.
+
+v1.1.1
+======
+- Added: WordPress core rollback support.
+- Added: Pre-upgrade core version snapshot for verified rollback targets.
+- Improved: Core update verification logic.
+
+v1.1.0
+======
+- Fixed: Improved response details
+- Optimized: Plugin and theme updates
+
+v1.0.9
+======
+- Fixed: Deactivator parses structured input matching Activator pattern
+
 v1.0.8
 ======
 - Fixed: Update Cloudflare namespace from CF\ to Cloudflare\APO\ for compatibility with Cloudflare plugin v4.14.0+

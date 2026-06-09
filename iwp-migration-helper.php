@@ -210,17 +210,12 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					);
 				}
 				// Generate api key and make migration request
-				$connect_response = Helper::instawp_generate_api_key(
+				$migration_request = Helper::instaMigrateRequest(
 					INSTAWP_API_KEY,
-					'',
-					array(
-						'e2e_mig_push_request' => true,
-						'wlm_slug'             => $wlm_slug,
-						'managed'              => false,
-					)
+					$wlm_slug,
 				);
 
-				if ( ! $connect_response ) {
+				if ( ! $migration_request['success'] ) {
 					wp_send_json_error(
 						array(
 							'message'  => __( 'Website could not connect successfully.', 'iwp-migration-helper' ),
@@ -229,18 +224,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					);
 				}
 
-				// Get migration group id
-				$group_uuid = Helper::get_mig_gid();
-				if ( empty( $group_uuid ) ) {
-					wp_send_json_error(
-						array(
-							'message'  => __( 'Something went wrong.', 'iwp-migration-helper' ),
-							'response' => false,
-						)
-					);
-				}
-
-				$this->redirect_url = esc_url( sprintf( '%s/%s?g_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, $group_uuid ) );
+				$this->redirect_url = esc_url( $migration_request['data']['migration_url'] );
 				wp_send_json_success(
 					array(
 						'message'      => __( 'Ready to start migration.', 'iwp-migration-helper' ),

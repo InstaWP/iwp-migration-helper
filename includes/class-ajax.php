@@ -39,6 +39,8 @@ class IWP_HOSTING_Ajax {
 		delete_option( 'iwp_demo_created_at' );
 		delete_option( 'iwp_demo_error_counter' );
 		delete_option( 'iwp_auto_bg_mig_initiated' );
+		// Clear the persisted engine so a fresh run re-resolves it.
+		delete_option( 'iwp_migration_engine' );
 
 		iwp_get_demo_site_data();
 
@@ -81,6 +83,26 @@ class IWP_HOSTING_Ajax {
 	}
 
 	function install_plugin() {
+
+		// v4 destination plugin is InstaMigrate (the agent pushes into it over its API key), not
+		// instawp-connect. v3 keeps the legacy instawp-connect install below, unchanged.
+		if ( 'v4' === iwp_resolve_migration_engine() ) {
+			$res = Helper::installInstaMigrate();
+			if ( empty( $res['success'] ) ) {
+				return $this->send_response(
+					array( 'message' => Helper::get_args_option( 'message', $res, esc_html__( 'Failed to install InstaMigrate plugin.' ) ) ),
+					true
+				);
+			}
+
+			return $this->send_response(
+				array(
+					'message'  => esc_html__( 'InstaMigrate plugin activated successfully.' ),
+					'response' => $res,
+				)
+			);
+		}
+
 		if ( ! function_exists( 'get_plugins' ) || ! function_exists( 'get_mu_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -128,6 +150,21 @@ class IWP_HOSTING_Ajax {
 
 	function set_api_key() {
 		$this->check_nonce();
+
+		// v4: the "api key" is the InstaMigrate destination plugin key (idempotently ensured) — there
+		// is no instawp-connect connect step. v3 keeps the legacy connect-key generation below.
+		if ( 'v4' === iwp_resolve_migration_engine() ) {
+			$res = Helper::getInstaMigrateApiKey();
+			if ( empty( $res['success'] ) ) {
+				return $this->send_response(
+					array( 'message' => Helper::get_args_option( 'message', $res, esc_html__( 'Failed to generate InstaMigrate API key.' ) ) ),
+					true
+				);
+			}
+
+			return $this->send_response( array( 'message' => esc_html__( 'InstaMigrate API key is ready.' ) ) );
+		}
+
 		if ( ! empty( Helper::get_api_key() ) ) {
 			return $this->send_response( array( 'message' => esc_html__( 'Website is already connected.' ) ) );
 		}
@@ -193,6 +230,14 @@ class IWP_HOSTING_Ajax {
 
 	function initiate_migration() {
 		$this->check_nonce();
+
+		// v4: pre-connected "push" migration via the agent. The source is the InstaWP demo site we
+		// already hold SSH for; this site is the destination (InstaMigrate plugin key). Branch out
+		// before the v3-only InstaWP_Tools path below, which v4 does not use.
+		if ( 'v4' === iwp_resolve_migration_engine() ) {
+			return $this->initiate_migration_v4();
+		}
+
 		if ( ! function_exists( 'instawp' ) ) {
 			return $this->send_response( array( 'message' => esc_html__( 'Please install InstaWP Connect plugin first.' ) ), true );
 		}
@@ -299,6 +344,106 @@ class IWP_HOSTING_Ajax {
 			array(
 				'message'                  => esc_html__( 'Migration initiated successfully. You will be redirected to the tracking page, or you can track the migration using this link:' ) . $iwp_migrate_tracking_url,
 				'iwp_migrate_tracking_url' => $iwp_migrate_tracking_url,
+			)
+		);
+	}
+
+	/**
+	 * Initiate a v4 "push" migration.
+	 *
+	 * Backward-compatible successor of the v3 `migrates-v3/push-only` call: same non-slug,
+	 * token-authenticated contract. The source is the InstaWP demo site (`iwp_demo_site_id`) the
+	 * platform already holds SSH for, and THIS WordPress site is the destination (its InstaMigrate
+	 * plugin key). One call to `migrate-v4/push-only` starts the migration on the agent and returns
+	 * the hosted URL. The white-label slug is OPTIONAL — passed in the body only when configured —
+	 * so slug-less setups keep working exactly like v3. No InstaWP_Tools / migrate-key / dest-file
+	 * mechanics (v3-only); the agent does the SSH-based transfer.
+	 */
+	function initiate_migration_v4() {
+
+		global $wp_version;
+
+		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
+			return $this->send_response( array( 'message' => esc_html__( 'Could not find the demo site details.' ) ), true );
+		}
+
+		// Ensure the InstaMigrate destination plugin + its API key (both idempotent — no-ops if the
+		// earlier install/set-api-key steps already ran for this engine).
+		$install = Helper::installInstaMigrate();
+		if ( empty( $install['success'] ) ) {
+			return $this->send_response(
+				array(
+					'message' => Helper::get_args_option( 'message', $install, esc_html__( 'Failed to install InstaMigrate plugin.' ) ),
+					'details' => $install,
+				),
+				true
+			);
+		}
+
+		$key_res = Helper::getInstaMigrateApiKey();
+		if ( empty( $key_res['success'] ) || empty( $key_res['data']['insta_mig_key'] ) ) {
+			return $this->send_response(
+				array(
+					'message' => Helper::get_args_option( 'message', $key_res, esc_html__( 'Failed to generate InstaMigrate API key.' ) ),
+					'details' => $key_res,
+				),
+				true
+			);
+		}
+
+		$locale = defined( 'INSTAWP_MIGRATE_LANGUAGE_SLUG' ) && ! empty( INSTAWP_MIGRATE_LANGUAGE_SLUG ) ? INSTAWP_MIGRATE_LANGUAGE_SLUG : get_locale();
+
+		$push_args = array(
+			'source_site_id' => $iwp_demo_site_id,                                   // InstaWP source (SSH held server-side)
+			'destination_url'=> home_url(),                                          // this site = destination
+			'plugin_api_key' => $key_res['data']['insta_mig_key'],                   // InstaMigrate key on the destination
+			'wp_admin_email' => function_exists( 'get_bloginfo' ) ? get_bloginfo( 'admin_email' ) : Option::get_option( 'admin_email' ),
+			'php_version'    => PHP_VERSION,
+			'wp_version'     => $wp_version,
+			'plugin_version' => defined( 'INSTA_MIGRATE_VERSION' ) ? INSTA_MIGRATE_VERSION : IWP_HOSTING_MIG_PLUGIN_VERSION,
+			'locale'         => $locale,
+		);
+
+		// White-label slug is OPTIONAL — include it only when configured (branding/attribution). A
+		// missing slug is NOT an error, keeping parity with the slug-less v3 push-only flow.
+		$wlm_slug = iwp_migration_wlm_slug();
+		if ( ! empty( $wlm_slug ) ) {
+			$push_args['wlm_slug'] = $wlm_slug;
+		}
+
+		$push_res = Curl::do_curl( 'migrate-v4/push-only', $push_args, array(), 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
+
+		if ( isset( $push_res['success'] ) && $push_res['success'] !== true ) {
+			return $this->send_response(
+				array(
+					'message' => Helper::get_args_option( 'message', $push_res ),
+					'details' => $push_res,
+				),
+				true
+			);
+		}
+
+		$push_res_data = Helper::get_args_option( 'data', $push_res );
+		$migration_url = Helper::get_args_option( 'migration_url', $push_res_data );
+
+		if ( empty( $migration_url ) ) {
+			return $this->send_response(
+				array(
+					'message' => esc_html__( 'Could not get the migration URL from the response.' ),
+					'details' => $push_res,
+				),
+				true
+			);
+		}
+
+		// Same option + response key the v3 flow uses, so redirect_to_migration_page() and the JS
+		// redirect work unchanged. v4 has no migrate_id/key/uuid, so those are intentionally omitted.
+		update_option( 'iwp_migrate_tracking_url', $migration_url );
+
+		return $this->send_response(
+			array(
+				'message'                  => esc_html__( 'Migration initiated successfully. You will be redirected to the tracking page, or you can track the migration using this link:' ) . $migration_url,
+				'iwp_migrate_tracking_url' => $migration_url,
 			)
 		);
 	}

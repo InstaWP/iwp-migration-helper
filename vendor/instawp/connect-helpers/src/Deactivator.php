@@ -14,7 +14,7 @@ class Deactivator {
 		if ( count( $this->args ) < 1 ) {
 			return [
 				'success' => false,
-				'message' => esc_html( 'Minimum 1 item is required!' ),
+				'message' => esc_html__( 'Minimum 1 item is required!', 'connect-helpers' ),
 			];
 		}
 
@@ -22,15 +22,49 @@ class Deactivator {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 
-		if ( ! function_exists( 'deactivate_plugins' ) ) {
+		if ( ! function_exists( 'deactivate_plugins' ) || ! function_exists( 'is_plugin_active' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		deactivate_plugins( $this->args );
+		$results = [];
 
-		return [
-			'success' => true,
-			'message' => esc_html( 'Success!' )
-		];
+		foreach ( $this->args as $item ) {
+			if ( ! isset( $item['type'], $item['asset'] ) ) {
+				// Key by asset for consistency with Updater response format
+				$results[ isset($item['asset']) ? $item['asset'] : 'unknown' ] = [
+					'success' => false,
+					'message' => esc_html__( 'Required parameters are missing!', 'connect-helpers' ),
+					'item'    => $item,
+				];
+				continue;
+			}
+
+			if ( 'plugin' === $item['type'] ) {
+				deactivate_plugins( $item['asset'] );
+
+				// Verify the plugin is actually deactivated
+				if ( is_plugin_active( $item['asset'] ) ) {
+					$results[ $item['asset'] ] = [
+						'success' => false,
+						'message' => esc_html__( 'Deactivation completed but plugin is still active.', 'connect-helpers' ),
+						'item'    => $item,
+					];
+				} else {
+					$results[ $item['asset'] ] = [
+						'success' => true,
+						'message' => esc_html__( 'Success!', 'connect-helpers' ),
+						'item'    => $item,
+					];
+				}
+			} else {
+				$results[ $item['asset'] ] = [
+					'success' => false,
+					'message' => esc_html__( 'Only plugins can be deactivated!', 'connect-helpers' ),
+					'item'    => $item,
+				];
+			}
+		}
+
+		return $results;
 	}
 }
