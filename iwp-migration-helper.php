@@ -3,7 +3,7 @@
  * Plugin Name: InstaWP Migration Helper
  * Plugin URI: https://instawp.com/hosting-migration/
  * Description: Migration helper plugin for hosting providers.
- * Version: 1.1.8
+ * Version: 1.1.9
  * Text Domain: iwp-migration-helper
  * Author: InstaWP Team
  * Author URI: https://instawp.com/
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_FILE' ) || define( 'IWP_HOSTING_MIG_PLUGIN_FILE', plugin_basename( __FILE__ ) );
-defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.8' );
+defined( 'IWP_HOSTING_MIG_PLUGIN_VERSION' ) || define( 'IWP_HOSTING_MIG_PLUGIN_VERSION', '1.1.9' );
 
 
 if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
@@ -210,17 +210,12 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					);
 				}
 				// Generate api key and make migration request
-				$connect_response = Helper::instawp_generate_api_key(
+				$migration_request = Helper::instaMigrateRequest(
 					INSTAWP_API_KEY,
-					'',
-					array(
-						'e2e_mig_push_request' => true,
-						'wlm_slug'             => $wlm_slug,
-						'managed'              => false,
-					)
+					$wlm_slug,
 				);
 
-				if ( ! $connect_response ) {
+				if ( ! $migration_request['success'] ) {
 					wp_send_json_error(
 						array(
 							'message'  => __( 'Website could not connect successfully.', 'iwp-migration-helper' ),
@@ -229,18 +224,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					);
 				}
 
-				// Get migration group id
-				$group_uuid = Helper::get_mig_gid();
-				if ( empty( $group_uuid ) ) {
-					wp_send_json_error(
-						array(
-							'message'  => __( 'Something went wrong.', 'iwp-migration-helper' ),
-							'response' => false,
-						)
-					);
-				}
-
-				$this->redirect_url = esc_url( sprintf( '%s/%s?g_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, $group_uuid ) );
+				$this->redirect_url = esc_url( $migration_request['data']['migration_url'] );
 				wp_send_json_success(
 					array(
 						'message'      => __( 'Ready to start migration.', 'iwp-migration-helper' ),
