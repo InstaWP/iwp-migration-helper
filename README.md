@@ -64,11 +64,12 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
-#### 1.1.9 - 09 June 2026
+#### 1.1.9 - 17 June 2026
 - ADD - Support for the V4 migration engine (AI agent) with automatic v3/v4 detection.
 - ADD - Push migration via the V4 engine using the InstaMigrate plugin.
 - ENHANCE - End-to-end migration now uses the unified `instaMigrateRequest` helper.
-- UPDATE - Dependency packages.
+- ENHANCE - Self-update now uses a built-in GitHub release updater.
+- REMOVE - Dropped the `instawp/connect-helpers` Composer dependency and bundled `vendor/`; helper logic is now embedded directly in the plugin.
 
 #### 1.1.8 - 09 March 2026
 - ENHANCE - Demo migration no longer creates InstaWP Connect connections.

@@ -3,19 +3,19 @@
  * Auto migration prompt
  */
 
-use InstaWP\Connect\Helpers\Option;
+// Option reads use WordPress core get_option() directly.
 
-$iwp_demo_site_id    = Option::get_option( 'iwp_demo_site_id', '' );
-$iwp_demo_site_url   = Option::get_option( 'iwp_demo_site_url', '' );
-$iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
+$iwp_demo_site_id    = get_option( 'iwp_demo_site_id', '' );
+$iwp_demo_site_url   = get_option( 'iwp_demo_site_url', '' );
+$iwp_demo_created_at = get_option( 'iwp_demo_created_at', '' );
 $wrapper_classes     = array( 'iwp-auto-migration' );
 
 if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) || empty( $iwp_demo_created_at ) ) {
 	iwp_get_demo_site_data();
 
-	$iwp_demo_site_id    = Option::get_option( 'iwp_demo_site_id', '' );
-	$iwp_demo_site_url   = Option::get_option( 'iwp_demo_site_url', '' );
-	$iwp_demo_created_at = Option::get_option( 'iwp_demo_created_at', '' );
+	$iwp_demo_site_id    = get_option( 'iwp_demo_site_id', '' );
+	$iwp_demo_site_url   = get_option( 'iwp_demo_site_url', '' );
+	$iwp_demo_created_at = get_option( 'iwp_demo_created_at', '' );
 }
 
 // Return if section display not require in case demo details not found
@@ -26,7 +26,7 @@ if ( defined( 'INSTAWP_MIGRATE_HIDE_SECTION' ) && INSTAWP_MIGRATE_HIDE_SECTION &
 $has_url_box   = ( defined( 'DEMO_SITE_URL_INPUT_BOX' ) && DEMO_SITE_URL_INPUT_BOX );
 $demo_site_url = ( $has_url_box && defined( 'DEMO_SITE_URL' ) && ! empty( DEMO_SITE_URL ) ) ? DEMO_SITE_URL : '';
 // Override admin email
-$admin_email = $has_url_box && ( ! defined( 'INSTAWP_MIGRATE_EMAIL_CHECK_OFF' ) || ! INSTAWP_MIGRATE_EMAIL_CHECK_OFF ) ? Option::get_option( 'admin_email' ) : '';
+$admin_email = $has_url_box && ( ! defined( 'INSTAWP_MIGRATE_EMAIL_CHECK_OFF' ) || ! INSTAWP_MIGRATE_EMAIL_CHECK_OFF ) ? get_option( 'admin_email' ) : '';
 
 $iwp_am_settings = defined( 'IWP_AM_SETTINGS' ) ? json_decode( IWP_AM_SETTINGS ) : (object) array();
 $btn_disabled    = '';
