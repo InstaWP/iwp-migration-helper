@@ -1,8 +1,7 @@
 <?php
 
-use InstaWP\Connect\Helpers\Curl;
-use InstaWP\Connect\Helpers\Helper;
-use InstaWP\Connect\Helpers\Option;
+// Helper/Curl logic now comes from the embedded IWP_Migration_Utils class; option
+// reads/writes use WordPress core get_option()/update_option() directly.
 
 if ( ! function_exists( 'iwp_migration_helper_settings_var' ) ) {
 	function iwp_migration_helper_settings_var( $is_basic = true ) {
@@ -120,10 +119,12 @@ if ( ! function_exists( 'iwp_mig_helper_error_log' ) ) {
 	 * @return void
 	 */
 	function iwp_mig_helper_error_log( $paylod = array(), $th = null ) {
-		if ( ! method_exists( 'Helper', 'add_error_log' ) ) {
+		// Guard on the embedded utils class (the connect-helpers Helper class was removed);
+		// the old 'Helper' guard was always false, silently disabling all error logging.
+		if ( ! method_exists( 'IWP_Migration_Utils', 'add_error_log' ) ) {
 			return;
 		}
-		Helper::add_error_log( $paylod, $th );
+		IWP_Migration_Utils::add_error_log( $paylod, $th );
 	}
 }
 
@@ -168,7 +169,7 @@ if ( ! function_exists( 'iwp_resolve_migration_engine' ) ) {
 		}
 
 		// This resolver drives the plugin's push-only flow — tell client-app which flow asked.
-		$engine = Helper::getMigrationEngine( iwp_correct_api_key( INSTAWP_API_KEY ), 'push' );
+		$engine = IWP_Migration_Utils::getMigrationEngine( iwp_correct_api_key( INSTAWP_API_KEY ), 'push' );
 
 		if ( empty( $engine['success'] ) || empty( $engine['data']['engine'] ) || ! in_array( $engine['data']['engine'], array( 'v3', 'v4' ), true ) ) {
 			// Don't persist a failed/unknown lookup — keep legacy flow and allow a later retry.
@@ -222,7 +223,7 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			);
 		}
 
-		$iwp_demo_error_counter = (int) Option::get_option( 'iwp_demo_error_counter', '0' );
+		$iwp_demo_error_counter = (int) get_option( 'iwp_demo_error_counter', '0' );
 
 		if ( $iwp_demo_error_counter >= 20 ) {
 			return array(
@@ -232,7 +233,7 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 		}
 
 		$demo_site_args = array(
-			'email' => empty( $admin_email ) ? Option::get_option( 'admin_email' ) : $admin_email,
+			'email' => empty( $admin_email ) ? get_option( 'admin_email' ) : $admin_email,
 		);
 
 		if ( ! empty( $demo_url ) ) {
@@ -241,10 +242,10 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 				$demo_site_args['email_check_off'] = true;
 			}
 		}
-		$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, array(), 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
+		$demo_site_args_res = IWP_Migration_Utils::do_curl( 'sites/get-demo-site', $demo_site_args, array(), 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
 
 		if ( isset( $demo_site_args_res['success'] ) && $demo_site_args_res['success'] !== true ) {
-			Option::update_option( 'iwp_demo_error_counter', $iwp_demo_error_counter + 1 );
+			update_option( 'iwp_demo_error_counter', $iwp_demo_error_counter + 1, false );
 			return array(
 				'success' => false,
 				'message' => __( 'Failed to retrieve demo site data. ', 'iwp-migration-helper' ),
@@ -256,10 +257,10 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			);
 		}
 
-		$demo_site_args_res_data = Helper::get_args_option( 'data', $demo_site_args_res );
-		$iwp_demo_site_id        = Helper::get_args_option( 'site_id', $demo_site_args_res_data );
-		$iwp_demo_site_url       = Helper::get_args_option( 'site_url', $demo_site_args_res_data );
-		$iwp_demo_created_at     = Helper::get_args_option( 'created_at', $demo_site_args_res_data );
+		$demo_site_args_res_data = IWP_Migration_Utils::get_args_option( 'data', $demo_site_args_res );
+		$iwp_demo_site_id        = IWP_Migration_Utils::get_args_option( 'site_id', $demo_site_args_res_data );
+		$iwp_demo_site_url       = IWP_Migration_Utils::get_args_option( 'site_url', $demo_site_args_res_data );
+		$iwp_demo_created_at     = IWP_Migration_Utils::get_args_option( 'created_at', $demo_site_args_res_data );
 
 		if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) ) {
 			return array(
@@ -273,9 +274,9 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			);
 		}
 
-		Option::update_option( 'iwp_demo_site_id', $iwp_demo_site_id );
-		Option::update_option( 'iwp_demo_site_url', $iwp_demo_site_url );
-		Option::update_option( 'iwp_demo_created_at', $iwp_demo_created_at );
+		update_option( 'iwp_demo_site_id', $iwp_demo_site_id, false );
+		update_option( 'iwp_demo_site_url', $iwp_demo_site_url, false );
+		update_option( 'iwp_demo_created_at', $iwp_demo_created_at, false );
 
 		// Reset the counter if the demo site found.
 		delete_option( 'iwp_demo_error_counter' );

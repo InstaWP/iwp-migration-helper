@@ -11,9 +11,6 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
 
-use InstaWP\Connect\Helpers\Helper;
-use InstaWP\Connect\Helpers\Installer;
-
 defined( 'ABSPATH' ) || exit;
 defined( 'IWP_HOSTING_MIG_PLUGIN_DIR' ) || define( 'IWP_HOSTING_MIG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'IWP_HOSTING_MIG_PLUGIN_URL' ) || define( 'IWP_HOSTING_MIG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -39,10 +36,10 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 			if ( ! defined( 'INSTAWP_API_DOMAIN' ) || ! defined( 'INSTAWP_API_KEY' ) || ! defined( 'INSTAWP_MIGRATE_ENDPOINT' ) ) {
 				add_action( 'admin_notices', array( $this, 'notice_missing_required_settings' ) );
 			} elseif ( iwp_cant_auto_bg_migration() ) {
-				Helper::set_api_domain( INSTAWP_API_DOMAIN );
+				IWP_Migration_Utils::set_api_domain( INSTAWP_API_DOMAIN );
 
 				self::$_script_version = defined( 'WP_DEBUG' ) && WP_DEBUG ? current_time( 'U' ) : IWP_HOSTING_MIG_PLUGIN_VERSION;
-				$this->redirect_url    = esc_url( sprintf( '%s/%s?g_id=%s', Helper::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, Helper::get_mig_gid() ) );
+				$this->redirect_url    = esc_url( sprintf( '%s/%s?g_id=%s', IWP_Migration_Utils::get_api_domain(), INSTAWP_MIGRATE_ENDPOINT, IWP_Migration_Utils::get_mig_gid() ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 				add_action( 'admin_notices', array( $this, 'display_migration_notice' ) );
 				add_action( 'wp_ajax_instawp_connect_website', array( $this, 'instawp_connect_website' ) );
@@ -131,12 +128,11 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 		 * @since 1.0.5
 		 */
 		function check_update() {
-			if ( class_exists( 'InstaWP\Connect\Helpers\AutoUpdatePluginFromGitHub' ) ) {
-				$updater = new InstaWP\Connect\Helpers\AutoUpdatePluginFromGitHub(
-					IWP_HOSTING_MIG_PLUGIN_VERSION, // Current version
-					'https://github.com/InstaWP/iwp-migration-helper', // URL to GitHub repo
-					plugin_basename( __FILE__ ) // Plugin slug
-				);
+			// Self-update from GitHub releases via the embedded updater (replaces the
+			// connect-helpers AutoUpdatePluginFromGitHub). The class reads the plugin's
+			// own constants for repo, version and basename.
+			if ( class_exists( 'IWP_Migration_Helper_Updater' ) ) {
+				new IWP_Migration_Helper_Updater();
 			} else {
 				error_log( 'Update check class not found.' );
 			}
@@ -155,17 +151,21 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			// Install and activate the plugin
+			// Install and activate the plugin. The connect-helpers Installer class was removed
+			// with the dependency, so install via the embedded utils instead (it runs the same
+			// is_plugin_active check internally and installs + activates instawp-connect).
 			if ( ! is_plugin_active( sprintf( '%1$s/%1$s.php', self::$_connect_plugin_slug ) ) ) {
-				$params    = array(
-					array(
-						'slug'     => 'instawp-connect',
-						'type'     => 'plugin',
-						'activate' => true,
-					),
-				);
-				$installer = new Installer( $params );
-				$response  = $installer->start();
+				$response = IWP_Migration_Utils::installInstaWPConnect();
+
+				// Surface install/activation failures instead of falsely reporting success.
+				if ( empty( $response['success'] ) ) {
+					wp_send_json_error(
+						array(
+							'message'  => ! empty( $response['message'] ) ? $response['message'] : __( 'Plugin could not be activated.', 'iwp-migration-helper' ),
+							'response' => $response,
+						)
+					);
+				}
 
 				wp_send_json_success(
 					array(
@@ -186,7 +186,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			// Ready to start the migration
 			if ( function_exists( 'instawp' ) ) {
-				$this->redirect_url = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', Helper::get_api_domain(), admin_url() ) );
+				$this->redirect_url = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', IWP_Migration_Utils::get_api_domain(), admin_url() ) );
 				wp_send_json_success(
 					array(
 						'message'      => __( 'Ready to start migration.', 'iwp-migration-helper' ),
@@ -210,7 +210,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 					);
 				}
 				// Generate api key and make migration request
-				$migration_request = Helper::instaMigrateRequest(
+				$migration_request = IWP_Migration_Utils::instaMigrateRequest(
 					INSTAWP_API_KEY,
 					$wlm_slug,
 				);
@@ -305,7 +305,7 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 
 			if ( defined( 'INSTAWP_AUTO_MIGRATION' ) ) {
 				$localize_scripts['iwp_auto_migration']   = INSTAWP_AUTO_MIGRATION || INSTAWP_AUTO_MIGRATION == 'true';
-				$localize_scripts['iwp_auto_migrate_url'] = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', Helper::get_api_domain(), admin_url() ) );
+				$localize_scripts['iwp_auto_migrate_url'] = esc_url( sprintf( '%s/auto-migrate?callback_url=%s', IWP_Migration_Utils::get_api_domain(), admin_url() ) );
 			}
 
 			wp_enqueue_script( 'iwp-hosting-mig', plugins_url( '/assets/js/scripts.js', __FILE__ ), array( 'jquery' ), self::$_script_version );
@@ -328,8 +328,12 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 	}
 }
 
-require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
+// Load the self-contained migration utilities first so the includes below can use it.
+// This replaces the former Composer autoloader (instawp/connect-helpers) — the embedded
+// IWP_Migration_Utils class provides the same Helper/Curl surface this plugin relies on.
+require_once plugin_dir_path( __FILE__ ) . 'migration-utils/iwp-migration-utils.php';
 foreach ( array(
+	'class-iwp-github-updater',
 	'functions',
 	'class-ajax',
 	'class-demo-mig',

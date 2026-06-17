@@ -3,10 +3,8 @@
  * Ajax handler
  */
 
-use InstaWP\Connect\Helpers\Curl;
-use InstaWP\Connect\Helpers\Helper;
-use InstaWP\Connect\Helpers\Installer;
-use InstaWP\Connect\Helpers\Option;
+// Helper/Curl logic now comes from the embedded IWP_Migration_Utils class; option
+// reads use WordPress core get_option() directly. (Installer was imported but never used.)
 
 defined( 'ABSPATH' ) || exit;
 
@@ -87,10 +85,10 @@ class IWP_HOSTING_Ajax {
 		// v4 destination plugin is InstaMigrate (the agent pushes into it over its API key), not
 		// instawp-connect. v3 keeps the legacy instawp-connect install below, unchanged.
 		if ( 'v4' === iwp_resolve_migration_engine() ) {
-			$res = Helper::installInstaMigrate();
+			$res = IWP_Migration_Utils::installInstaMigrate();
 			if ( empty( $res['success'] ) ) {
 				return $this->send_response(
-					array( 'message' => Helper::get_args_option( 'message', $res, esc_html__( 'Failed to install InstaMigrate plugin.' ) ) ),
+					array( 'message' => IWP_Migration_Utils::get_args_option( 'message', $res, esc_html__( 'Failed to install InstaMigrate plugin.' ) ) ),
 					true
 				);
 			}
@@ -154,10 +152,10 @@ class IWP_HOSTING_Ajax {
 		// v4: the "api key" is the InstaMigrate destination plugin key (idempotently ensured) — there
 		// is no instawp-connect connect step. v3 keeps the legacy connect-key generation below.
 		if ( 'v4' === iwp_resolve_migration_engine() ) {
-			$res = Helper::getInstaMigrateApiKey();
+			$res = IWP_Migration_Utils::getInstaMigrateApiKey();
 			if ( empty( $res['success'] ) ) {
 				return $this->send_response(
-					array( 'message' => Helper::get_args_option( 'message', $res, esc_html__( 'Failed to generate InstaMigrate API key.' ) ) ),
+					array( 'message' => IWP_Migration_Utils::get_args_option( 'message', $res, esc_html__( 'Failed to generate InstaMigrate API key.' ) ) ),
 					true
 				);
 			}
@@ -165,11 +163,11 @@ class IWP_HOSTING_Ajax {
 			return $this->send_response( array( 'message' => esc_html__( 'InstaMigrate API key is ready.' ) ) );
 		}
 
-		if ( ! empty( Helper::get_api_key() ) ) {
+		if ( ! empty( IWP_Migration_Utils::get_api_key() ) ) {
 			return $this->send_response( array( 'message' => esc_html__( 'Website is already connected.' ) ) );
 		}
 
-		$connect_response = Helper::instawp_generate_api_key( Helper::get_api_key( false, INSTAWP_API_KEY ), '', array( 'without_connect' => true ) );
+		$connect_response = IWP_Migration_Utils::instawp_generate_api_key( IWP_Migration_Utils::get_api_key( false, INSTAWP_API_KEY ), '', array( 'without_connect' => true ) );
 
 		if ( ! $connect_response ) {
 			return $this->send_response(
@@ -191,26 +189,26 @@ class IWP_HOSTING_Ajax {
 
 	function connect_demo_site() {
 		$this->check_nonce();
-		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
+		if ( empty( $iwp_demo_site_id = get_option( 'iwp_demo_site_id', '' ) ) ) {
 			return $this->send_response( array( 'message' => esc_html__( 'Could not find the demo site details.' ) ), true );
 		}
 
-		$install_connect_args = array( 'destination_connect_id' => Helper::get_connect_id() );
-		$install_connect_res  = Curl::do_curl( "sites/{$iwp_demo_site_id}/install-connect", $install_connect_args );
+		$install_connect_args = array( 'destination_connect_id' => IWP_Migration_Utils::get_connect_id() );
+		$install_connect_res  = IWP_Migration_Utils::do_curl( "sites/{$iwp_demo_site_id}/install-connect", $install_connect_args );
 
 		if ( isset( $install_connect_res['success'] ) && $install_connect_res['success'] !== true ) {
 			return $this->send_response(
 				array(
-					'message' => Helper::get_args_option( 'message', $install_connect_res ),
+					'message' => IWP_Migration_Utils::get_args_option( 'message', $install_connect_res ),
 					'details' => $install_connect_res,
 				),
 				true
 			);
 		}
 
-		$install_connect_res_data   = Helper::get_args_option( 'data', $install_connect_res );
-		$iwp_demo_site_connect_id   = Helper::get_args_option( 'connect_id', $install_connect_res_data );
-		$iwp_demo_site_connect_uuid = Helper::get_args_option( 'connect_uuid', $install_connect_res_data );
+		$install_connect_res_data   = IWP_Migration_Utils::get_args_option( 'data', $install_connect_res );
+		$iwp_demo_site_connect_id   = IWP_Migration_Utils::get_args_option( 'connect_id', $install_connect_res_data );
+		$iwp_demo_site_connect_uuid = IWP_Migration_Utils::get_args_option( 'connect_uuid', $install_connect_res_data );
 
 		if ( empty( $iwp_demo_site_connect_id ) || empty( $iwp_demo_site_connect_uuid ) ) {
 			return $this->send_response(
@@ -242,7 +240,7 @@ class IWP_HOSTING_Ajax {
 			return $this->send_response( array( 'message' => esc_html__( 'Please install InstaWP Connect plugin first.' ) ), true );
 		}
 
-		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
+		if ( empty( $iwp_demo_site_id = get_option( 'iwp_demo_site_id', '' ) ) ) {
 			return $this->send_response( array( 'message' => esc_html__( 'Could not find the demo site details.' ) ), true );
 		}
 
@@ -254,7 +252,7 @@ class IWP_HOSTING_Ajax {
 		// Clean InstaWP backup directory
 		InstaWP_Tools::clean_instawpbackups_dir();
 
-		$migrate_key       = Helper::get_random_string( 40 );
+		$migrate_key       = IWP_Migration_Utils::get_random_string( 40 );
 		$current_user_data = (array) $current_user->data;
 
 		if ( isset( $current_user_data['user_pass'] ) ) {
@@ -281,14 +279,14 @@ class IWP_HOSTING_Ajax {
 
 		$dest_file_url = $dest_file_url['dest_url'];
 
-		$initiate_push_args = Helper::get_connect_config(
+		$initiate_push_args = IWP_Migration_Utils::get_connect_config(
 			array(
 				'source_site_id'  	 => $iwp_demo_site_id,
-				'wp_admin_email'	 => function_exists( 'get_bloginfo' ) ? get_bloginfo( 'admin_email' ) : Option::get_option( 'admin_email' ),
+				'wp_admin_email'	 => function_exists( 'get_bloginfo' ) ? get_bloginfo( 'admin_email' ) : get_option( 'admin_email' ),
 				'php_version'        => PHP_VERSION,
 				'wp_version'         => $wp_version,
 				'plugin_version'     => INSTAWP_PLUGIN_VERSION,
-				'active_plugins'     => Option::get_option( 'active_plugins' ),
+				'active_plugins'     => get_option( 'active_plugins' ),
 				'migrate_settings'   => $migrate_settings,
 				'migrate_key'        => $migrate_key,
 				'dest_url'           => $dest_file_url,
@@ -298,23 +296,23 @@ class IWP_HOSTING_Ajax {
 				'mig_wo_connects'    => true,
 			)
 		);
-		$initiate_push_res  = Curl::do_curl( 'migrates-v3/push-only', $initiate_push_args );
+		$initiate_push_res  = IWP_Migration_Utils::do_curl( 'migrates-v3/push-only', $initiate_push_args );
 
 		if ( isset( $initiate_push_res['success'] ) && $initiate_push_res['success'] !== true ) {
 			return $this->send_response(
 				array(
-					'message' => Helper::get_args_option( 'message', $initiate_push_res ),
+					'message' => IWP_Migration_Utils::get_args_option( 'message', $initiate_push_res ),
 					'details' => $initiate_push_res,
 				),
 				true
 			);
 		}
 
-		$initiate_push_res_data   = Helper::get_args_option( 'data', $initiate_push_res );
-		$iwp_migrate_id           = Helper::get_args_option( 'migrate_id', $initiate_push_res_data );
-		$iwp_migrate_key          = Helper::get_args_option( 'migrate_key', $initiate_push_res_data );
-		$iwp_migrate_uuid         = Helper::get_args_option( 'uuid', $initiate_push_res_data );
-		$iwp_migrate_tracking_url = Helper::get_args_option( 'tracking_url', $initiate_push_res_data );
+		$initiate_push_res_data   = IWP_Migration_Utils::get_args_option( 'data', $initiate_push_res );
+		$iwp_migrate_id           = IWP_Migration_Utils::get_args_option( 'migrate_id', $initiate_push_res_data );
+		$iwp_migrate_key          = IWP_Migration_Utils::get_args_option( 'migrate_key', $initiate_push_res_data );
+		$iwp_migrate_uuid         = IWP_Migration_Utils::get_args_option( 'uuid', $initiate_push_res_data );
+		$iwp_migrate_tracking_url = IWP_Migration_Utils::get_args_option( 'tracking_url', $initiate_push_res_data );
 
 		if ( empty( $iwp_migrate_id ) || empty( $iwp_migrate_key ) || empty( $iwp_migrate_uuid ) || empty( $iwp_migrate_tracking_url ) ) {
 			return $this->send_response(
@@ -363,28 +361,28 @@ class IWP_HOSTING_Ajax {
 
 		global $wp_version;
 
-		if ( empty( $iwp_demo_site_id = Option::get_option( 'iwp_demo_site_id', '' ) ) ) {
+		if ( empty( $iwp_demo_site_id = get_option( 'iwp_demo_site_id', '' ) ) ) {
 			return $this->send_response( array( 'message' => esc_html__( 'Could not find the demo site details.' ) ), true );
 		}
 
 		// Ensure the InstaMigrate destination plugin + its API key (both idempotent — no-ops if the
 		// earlier install/set-api-key steps already ran for this engine).
-		$install = Helper::installInstaMigrate();
+		$install = IWP_Migration_Utils::installInstaMigrate();
 		if ( empty( $install['success'] ) ) {
 			return $this->send_response(
 				array(
-					'message' => Helper::get_args_option( 'message', $install, esc_html__( 'Failed to install InstaMigrate plugin.' ) ),
+					'message' => IWP_Migration_Utils::get_args_option( 'message', $install, esc_html__( 'Failed to install InstaMigrate plugin.' ) ),
 					'details' => $install,
 				),
 				true
 			);
 		}
 
-		$key_res = Helper::getInstaMigrateApiKey();
+		$key_res = IWP_Migration_Utils::getInstaMigrateApiKey();
 		if ( empty( $key_res['success'] ) || empty( $key_res['data']['insta_mig_key'] ) ) {
 			return $this->send_response(
 				array(
-					'message' => Helper::get_args_option( 'message', $key_res, esc_html__( 'Failed to generate InstaMigrate API key.' ) ),
+					'message' => IWP_Migration_Utils::get_args_option( 'message', $key_res, esc_html__( 'Failed to generate InstaMigrate API key.' ) ),
 					'details' => $key_res,
 				),
 				true
@@ -397,7 +395,7 @@ class IWP_HOSTING_Ajax {
 			'source_site_id' => $iwp_demo_site_id,                                   // InstaWP source (SSH held server-side)
 			'destination_url'=> home_url(),                                          // this site = destination
 			'plugin_api_key' => $key_res['data']['insta_mig_key'],                   // InstaMigrate key on the destination
-			'wp_admin_email' => function_exists( 'get_bloginfo' ) ? get_bloginfo( 'admin_email' ) : Option::get_option( 'admin_email' ),
+			'wp_admin_email' => function_exists( 'get_bloginfo' ) ? get_bloginfo( 'admin_email' ) : get_option( 'admin_email' ),
 			'php_version'    => PHP_VERSION,
 			'wp_version'     => $wp_version,
 			'plugin_version' => defined( 'INSTA_MIGRATE_VERSION' ) ? INSTA_MIGRATE_VERSION : IWP_HOSTING_MIG_PLUGIN_VERSION,
@@ -411,20 +409,20 @@ class IWP_HOSTING_Ajax {
 			$push_args['wlm_slug'] = $wlm_slug;
 		}
 
-		$push_res = Curl::do_curl( 'migrate-v4/push-only', $push_args, array(), 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
+		$push_res = IWP_Migration_Utils::do_curl( 'migrate-v4/push-only', $push_args, array(), 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
 
 		if ( isset( $push_res['success'] ) && $push_res['success'] !== true ) {
 			return $this->send_response(
 				array(
-					'message' => Helper::get_args_option( 'message', $push_res ),
+					'message' => IWP_Migration_Utils::get_args_option( 'message', $push_res ),
 					'details' => $push_res,
 				),
 				true
 			);
 		}
 
-		$push_res_data = Helper::get_args_option( 'data', $push_res );
-		$migration_url = Helper::get_args_option( 'migration_url', $push_res_data );
+		$push_res_data = IWP_Migration_Utils::get_args_option( 'data', $push_res );
+		$migration_url = IWP_Migration_Utils::get_args_option( 'migration_url', $push_res_data );
 
 		if ( empty( $migration_url ) ) {
 			return $this->send_response(
