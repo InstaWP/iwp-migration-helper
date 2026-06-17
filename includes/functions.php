@@ -119,7 +119,9 @@ if ( ! function_exists( 'iwp_mig_helper_error_log' ) ) {
 	 * @return void
 	 */
 	function iwp_mig_helper_error_log( $paylod = array(), $th = null ) {
-		if ( ! method_exists( 'Helper', 'add_error_log' ) ) {
+		// Guard on the embedded utils class (the connect-helpers Helper class was removed);
+		// the old 'Helper' guard was always false, silently disabling all error logging.
+		if ( ! method_exists( 'IWP_Migration_Utils', 'add_error_log' ) ) {
 			return;
 		}
 		IWP_Migration_Utils::add_error_log( $paylod, $th );

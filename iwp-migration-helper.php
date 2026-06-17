@@ -151,17 +151,21 @@ if ( ! class_exists( 'IWP_HOSTING_MIG_Main' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			// Install and activate the plugin
+			// Install and activate the plugin. The connect-helpers Installer class was removed
+			// with the dependency, so install via the embedded utils instead (it runs the same
+			// is_plugin_active check internally and installs + activates instawp-connect).
 			if ( ! is_plugin_active( sprintf( '%1$s/%1$s.php', self::$_connect_plugin_slug ) ) ) {
-				$params    = array(
-					array(
-						'slug'     => 'instawp-connect',
-						'type'     => 'plugin',
-						'activate' => true,
-					),
-				);
-				$installer = new Installer( $params );
-				$response  = $installer->start();
+				$response = IWP_Migration_Utils::installInstaWPConnect();
+
+				// Surface install/activation failures instead of falsely reporting success.
+				if ( empty( $response['success'] ) ) {
+					wp_send_json_error(
+						array(
+							'message'  => ! empty( $response['message'] ) ? $response['message'] : __( 'Plugin could not be activated.', 'iwp-migration-helper' ),
+							'response' => $response,
+						)
+					);
+				}
 
 				wp_send_json_success(
 					array(
