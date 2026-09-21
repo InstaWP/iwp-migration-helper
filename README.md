@@ -64,7 +64,7 @@ define( 'IWP_AM_SETTINGS', '{"text_heading":"We have detected a website <span>{d
 
 ## Changelog
 
-#### 1.1.9 - 17 June 2026
+#### 1.1.9 - 21 September 2026
 - ADD - Support for the V4 migration engine (AI agent) with automatic v3/v4 detection.
 - ADD - Push migration via the V4 engine using the InstaMigrate plugin.
 - ENHANCE - End-to-end migration now uses the unified `instaMigrateRequest` helper.
