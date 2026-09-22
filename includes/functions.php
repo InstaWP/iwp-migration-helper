@@ -1,8 +1,7 @@
 <?php
 
-use InstaWP\Connect\Helpers\Curl;
-use InstaWP\Connect\Helpers\Helper;
-use InstaWP\Connect\Helpers\Option;
+// Helper/Curl logic now comes from the embedded IWP_Migration_Utils class; option
+// reads/writes use WordPress core get_option()/update_option() directly.
 
 if ( ! function_exists( 'iwp_migration_helper_settings_var' ) ) {
 	function iwp_migration_helper_settings_var( $is_basic = true ) {
@@ -120,10 +119,12 @@ if ( ! function_exists( 'iwp_mig_helper_error_log' ) ) {
 	 * @return void
 	 */
 	function iwp_mig_helper_error_log( $paylod = array(), $th = null ) {
-		if ( ! method_exists( 'Helper', 'add_error_log' ) ) {
+		// Guard on the embedded utils class (the connect-helpers Helper class was removed);
+		// the old 'Helper' guard was always false, silently disabling all error logging.
+		if ( ! method_exists( 'IWP_Migration_Utils', 'add_error_log' ) ) {
 			return;
 		}
-		Helper::add_error_log( $paylod, $th );
+		IWP_Migration_Utils::add_error_log( $paylod, $th );
 	}
 }
 
@@ -144,6 +145,68 @@ if ( ! function_exists( 'iwp_correct_api_key' ) ) {
 }
 
 
+if ( ! function_exists( 'iwp_resolve_migration_engine' ) ) {
+	/**
+	 * Resolve the active migration engine ('v3' | 'v4') and persist it.
+	 *
+	 * A migration is a one-time process, so once resolved the engine never changes for this site —
+	 * we store it in the options table (`iwp_migration_engine`) and reuse it across the three
+	 * sequential steps (install plugin → set api key → initiate) instead of hitting the API each
+	 * time. A failed lookup is NOT persisted and falls back to 'v3' (the legacy flow) so behaviour
+	 * is unchanged when the engine endpoint is unreachable; a later step can still resolve it.
+	 *
+	 * @return string 'v3' or 'v4'
+	 */
+	function iwp_resolve_migration_engine() {
+
+		$stored = get_option( 'iwp_migration_engine' );
+		if ( ! empty( $stored ) && in_array( $stored, array( 'v3', 'v4' ), true ) ) {
+			return $stored;
+		}
+
+		if ( ! defined( 'INSTAWP_API_KEY' ) || empty( INSTAWP_API_KEY ) ) {
+			return 'v3';
+		}
+
+		// This resolver drives the plugin's push-only flow — tell client-app which flow asked.
+		$engine = IWP_Migration_Utils::getMigrationEngine( iwp_correct_api_key( INSTAWP_API_KEY ), 'push' );
+
+		if ( empty( $engine['success'] ) || empty( $engine['data']['engine'] ) || ! in_array( $engine['data']['engine'], array( 'v3', 'v4' ), true ) ) {
+			// Don't persist a failed/unknown lookup — keep legacy flow and allow a later retry.
+			return 'v3';
+		}
+
+		update_option( 'iwp_migration_engine', $engine['data']['engine'] );
+
+		return $engine['data']['engine'];
+	}
+}
+
+if ( ! function_exists( 'iwp_migration_wlm_slug' ) ) {
+	/**
+	 * Derive the white-label migration slug from INSTAWP_MIGRATE_ENDPOINT (e.g. "migrate/<slug>").
+	 *
+	 * Returns '' when unset or still the literal "<slug>" placeholder from the default settings —
+	 * the v4 push-mig endpoint is white-label bound, so callers must treat an empty slug as a
+	 * misconfiguration.
+	 *
+	 * @return string
+	 */
+	function iwp_migration_wlm_slug() {
+		if ( ! defined( 'INSTAWP_MIGRATE_ENDPOINT' ) || empty( INSTAWP_MIGRATE_ENDPOINT ) ) {
+			return '';
+		}
+
+		$slug = trim( str_replace( 'migrate/', '', INSTAWP_MIGRATE_ENDPOINT ) );
+
+		if ( empty( $slug ) || false !== strpos( $slug, '<slug>' ) || 'slug' === $slug ) {
+			return '';
+		}
+
+		return $slug;
+	}
+}
+
 if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 	/**
 	 * Update demo site data
@@ -160,7 +223,7 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			);
 		}
 
-		$iwp_demo_error_counter = (int) Option::get_option( 'iwp_demo_error_counter', '0' );
+		$iwp_demo_error_counter = (int) get_option( 'iwp_demo_error_counter', '0' );
 
 		if ( $iwp_demo_error_counter >= 20 ) {
 			return array(
@@ -170,7 +233,7 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 		}
 
 		$demo_site_args = array(
-			'email' => empty( $admin_email ) ? Option::get_option( 'admin_email' ) : $admin_email,
+			'email' => empty( $admin_email ) ? get_option( 'admin_email' ) : $admin_email,
 		);
 
 		if ( ! empty( $demo_url ) ) {
@@ -179,10 +242,10 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 				$demo_site_args['email_check_off'] = true;
 			}
 		}
-		$demo_site_args_res = Curl::do_curl( 'sites/get-demo-site', $demo_site_args, array(), 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
+		$demo_site_args_res = IWP_Migration_Utils::do_curl( 'sites/get-demo-site', $demo_site_args, array(), 'POST', 'v2', iwp_correct_api_key( INSTAWP_API_KEY ) );
 
 		if ( isset( $demo_site_args_res['success'] ) && $demo_site_args_res['success'] !== true ) {
-			Option::update_option( 'iwp_demo_error_counter', $iwp_demo_error_counter + 1 );
+			update_option( 'iwp_demo_error_counter', $iwp_demo_error_counter + 1, false );
 			return array(
 				'success' => false,
 				'message' => __( 'Failed to retrieve demo site data. ', 'iwp-migration-helper' ),
@@ -194,10 +257,10 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			);
 		}
 
-		$demo_site_args_res_data = Helper::get_args_option( 'data', $demo_site_args_res );
-		$iwp_demo_site_id        = Helper::get_args_option( 'site_id', $demo_site_args_res_data );
-		$iwp_demo_site_url       = Helper::get_args_option( 'site_url', $demo_site_args_res_data );
-		$iwp_demo_created_at     = Helper::get_args_option( 'created_at', $demo_site_args_res_data );
+		$demo_site_args_res_data = IWP_Migration_Utils::get_args_option( 'data', $demo_site_args_res );
+		$iwp_demo_site_id        = IWP_Migration_Utils::get_args_option( 'site_id', $demo_site_args_res_data );
+		$iwp_demo_site_url       = IWP_Migration_Utils::get_args_option( 'site_url', $demo_site_args_res_data );
+		$iwp_demo_created_at     = IWP_Migration_Utils::get_args_option( 'created_at', $demo_site_args_res_data );
 
 		if ( empty( $iwp_demo_site_id ) || empty( $iwp_demo_site_url ) ) {
 			return array(
@@ -211,9 +274,9 @@ if ( ! function_exists( 'iwp_get_demo_site_data' ) ) {
 			);
 		}
 
-		Option::update_option( 'iwp_demo_site_id', $iwp_demo_site_id );
-		Option::update_option( 'iwp_demo_site_url', $iwp_demo_site_url );
-		Option::update_option( 'iwp_demo_created_at', $iwp_demo_created_at );
+		update_option( 'iwp_demo_site_id', $iwp_demo_site_id, false );
+		update_option( 'iwp_demo_site_url', $iwp_demo_site_url, false );
+		update_option( 'iwp_demo_created_at', $iwp_demo_created_at, false );
 
 		// Reset the counter if the demo site found.
 		delete_option( 'iwp_demo_error_counter' );

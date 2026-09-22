@@ -4,7 +4,7 @@
  *
  * WP CLI Command : wp instawp migration-helper init
  */
-use InstaWP\Connect\Helpers\Helper;
+// Helper logic now comes from the embedded IWP_Migration_Utils class.
 
 defined( 'ABSPATH' ) || exit;
 
@@ -160,7 +160,7 @@ if ( ! class_exists( 'IWP_Demo_Migration_Helper' ) ) {
 				update_option( $this->mig_init_key_name, 1 );
 
 				$iwp_ajax = new IWP_HOSTING_Ajax();
-				Helper::set_api_domain( INSTAWP_API_DOMAIN );
+				IWP_Migration_Utils::set_api_domain( INSTAWP_API_DOMAIN );
 				$demo_url = defined( 'DEMO_SITE_URL' ) && ! empty( DEMO_SITE_URL ) ? DEMO_SITE_URL : '';
 
 				// Run migration steps
