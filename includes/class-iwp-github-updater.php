@@ -264,6 +264,12 @@ if ( ! class_exists( 'IWP_Migration_Helper_Updater' ) ) {
          * @return array
          */
         public function add_action_links( $links ) {
+            // Another filter callback may hand us something other than an array;
+            // pass it through untouched rather than risk a fatal in array_unshift().
+            if ( ! is_array( $links ) ) {
+                return $links;
+            }
+
             $check_update_link = sprintf(
                 '<a href="%s">%s</a>',
                 esc_url( wp_nonce_url(
