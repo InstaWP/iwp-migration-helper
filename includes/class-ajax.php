@@ -4,7 +4,7 @@
  */
 
 // Helper/Curl logic now comes from the embedded IWP_Migration_Utils class; option
-// reads use WordPress core get_option() directly. (Installer was imported but never used.)
+// reads use WordPress core get_option() directly.
 
 defined( 'ABSPATH' ) || exit;
 
@@ -109,16 +109,13 @@ class IWP_HOSTING_Ajax {
 			return $this->send_response( array( 'message' => esc_html__( 'Connect plugin is already installed and activated.' ) ) );
 		}
 
-		$installer = new Installer(
-			array(
-				array(
-					'slug'     => 'instawp-connect',
-					'type'     => 'plugin',
-					'activate' => true,
-				),
-			)
-		);
-		$response  = $installer->start();
+		$response = IWP_Migration_Utils::installInstaWPConnect();
+		if ( empty( $response['success'] ) ) {
+			return $this->send_response(
+				array( 'message' => IWP_Migration_Utils::get_args_option( 'message', $response, esc_html__( 'Failed to install InstaWP Connect plugin.' ) ) ),
+				true
+			);
+		}
 
 		return $this->send_response(
 			array(
